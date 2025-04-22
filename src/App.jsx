@@ -9,10 +9,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
-<<<<<<< HEAD
         <Route path="/login" element={<LoginPage />} />
-=======
->>>>>>> 563993734dc786c621b7ae2ce6791bdaa78ff8f7
         {/* Add other routes as needed */}
       </Routes>
     </Router>

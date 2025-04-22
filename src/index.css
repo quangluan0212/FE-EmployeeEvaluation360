@@ -16,7 +16,6 @@ body {
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
-<<<<<<< HEAD
 }
 .login-button {
   background-color: var(--primary-color);
@@ -32,6 +31,4 @@ code {
 
 .forgot-password:hover {
   color: var(--primary-color);
-=======
->>>>>>> 563993734dc786c621b7ae2ce6791bdaa78ff8f7
 }
