@@ -1,19 +1,14 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import HomePage from "./pages/HomePage"
 import './index.css'
-import LoginPage from "./pages/LoginPage"
+import AppRoutes from './routes/AppRoutes';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
-
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        {/* Add other routes as needed */}
-      </Routes>
-    </Router>
-  )
+    <ErrorBoundary>
+      <AppRoutes />
+    </ErrorBoundary>
+  );
 }
 
-export default App
+export default App;
