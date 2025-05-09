@@ -77,7 +77,7 @@ const Sidebar = ({ userName, roles }) => {
               </li>
               <li>
                 <Link
-                  to="/"
+                  to="/project-management"
                   className="block py-2 px-4 rounded hover:bg-gray-700"
                 >
                   Dự án

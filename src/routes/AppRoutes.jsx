@@ -7,6 +7,7 @@ import Evaluations from '../pages/Evaluations';
 import EmployeeManagement from '../pages/EmployeeManagement'; 
 import Profile from '../pages/Profile';
 import RoleManagement from '../pages/RoleManagement';
+import ProjectManagement from '../pages/ProjectManagement';
 
 const AppRoutes = () => {
   return (
@@ -19,6 +20,7 @@ const AppRoutes = () => {
             <Route path="/evaluations" element={<Evaluations />} />
             <Route path="/employee-management" element={<EmployeeManagement />} />
             <Route path="/role-management" element={<RoleManagement />} />
+            <Route path="/project-management" element={<ProjectManagement />} />
         </Route>
       </Routes>
     </Router>

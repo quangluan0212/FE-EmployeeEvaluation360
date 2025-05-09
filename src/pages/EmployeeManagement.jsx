@@ -325,7 +325,7 @@ const EmployeeManagement = () => {
                   : "—"}
               </td>
               <td
-                className={`py-2 px-4 border-b ${
+                className={`py-2 px-4 font-bold border-b ${
                   employee.trangThai === "Lock"
                     ? "text-red-500"
                     : employee.trangThai === "Active"

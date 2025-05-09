@@ -1,4 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  getProjectList,
+  addProject,
+  updateProject,
+  deleteProject,
+} from "../api/DuAn";
 
 const ProjectManagement = () => {
   const [projects, setProjects] = useState([]);
@@ -8,35 +14,45 @@ const ProjectManagement = () => {
   const [currentProject, setCurrentProject] = useState({
     maDuAn: "",
     tenDuAn: "",
-    trangThai: "Active",
+    moTa: "",
+    trangThai: "Bắt đầu",
   });
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        // Replace with your API call to fetch projects
-        const response = await fetch(`/api/projects?page=${currentPage}&search=${searchTerm}`);
-        const data = await response.json();
-        setProjects(data.items);
-        setCurrentPage(data.currentPage);
-        setTotalPages(data.totalPages);
+        console.log(
+          `Fetching projects for page: ${currentPage}, searchTerm: ${searchTerm}`
+        );
+        const response = await getProjectList(currentPage, 10, searchTerm);
+        console.log("API response:", response);
+
+        if (response.items) {
+          setProjects(response.items);
+          setTotalPages(response.totalPages);
+        } else {
+          console.error("Unexpected response format:", response);
+          setProjects([]);
+          setTotalPages(1);
+        }
       } catch (error) {
         console.error("Error fetching projects:", error);
+        setProjects([]);
+        setTotalPages(1);
       }
     };
 
     fetchProjects();
   }, [currentPage, searchTerm]);
 
-  const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
   const handleAddProject = () => {
-    setCurrentProject({ maDuAn: "", tenDuAn: "", trangThai: "Active" });
+    setCurrentProject({
+      maDuAn: "",
+      tenDuAn: "",
+      moTa: "",
+      trangThai: "Bắt đầu",
+    });
     setShowModal(true);
   };
 
@@ -46,19 +62,30 @@ const ProjectManagement = () => {
   };
 
   const handleDeleteProject = async (maDuAn) => {
-    const userConfirmed = window.confirm("Bạn có chắc chắn muốn xóa dự án này?");
-    if (!userConfirmed) {
-      return;
-    }
+    const userConfirmed = window.confirm(
+      "Bạn có chắc chắn muốn xóa dự án này?"
+    );
+    if (!userConfirmed) return;
 
     try {
-      // Replace with your API call to delete a project
-      await fetch(`/api/projects/${maDuAn}`, { method: "DELETE" });
+      await deleteProject(maDuAn);
       alert("Xóa dự án thành công!");
-      setProjects((prevProjects) => prevProjects.filter((project) => project.maDuAn !== maDuAn));
+      setProjects((prevProjects) =>
+        prevProjects.filter((p) => p.maDuAn !== maDuAn)
+      );
     } catch (error) {
-      console.error("Error deleting project:", error);
+      console.error("Lỗi khi xóa dự án:", error);
       alert("Xóa dự án thất bại. Vui lòng thử lại!");
+    }
+  };
+
+  const handleSearch = () => {
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
     }
   };
 
@@ -68,32 +95,50 @@ const ProjectManagement = () => {
 
   const handleSaveProject = async () => {
     try {
-      if (!currentProject.tenDuAn) {
-        alert("Tên dự án không được để trống!");
+      if (!currentProject.tenDuAn || !currentProject.moTa) {
+        alert("Tên dự án và mô tả không được để trống!");
         return;
       }
 
       if (currentProject.maDuAn) {
-        // Replace with your API call to update a project
-        await fetch(`/api/projects/${currentProject.maDuAn}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(currentProject),
+        // Cập nhật dự án
+        const confirmed = window.confirm(
+          "Bạn có chắc chắn muốn cập nhật dự án này?"
+        );
+        if (!confirmed) return;
+
+        const updatedProject = await updateProject(currentProject.maDuAn, {
+          tenDuAn: currentProject.tenDuAn,
+          moTa: currentProject.moTa,
+          trangThai: currentProject.trangThai, // Trạng thái có thể thay đổi khi cập nhật
         });
+
         alert("Cập nhật dự án thành công!");
+        setProjects((prev) =>
+          prev.map((p) =>
+            p.maDuAn === updatedProject.maDuAn ? updatedProject : p
+          )
+        );
       } else {
-        // Replace with your API call to add a new project
-        await fetch(`/api/projects`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(currentProject),
+        // Thêm dự án mới
+        console.log("Sending project data:", {
+          tenDuAn: currentProject.tenDuAn,
+          moTa: currentProject.moTa,
         });
+        const newProject = await addProject({
+          tenDuAn: currentProject.tenDuAn,
+          moTa: currentProject.moTa,
+        });
+
         alert("Thêm dự án thành công!");
+        const response = await getProjectList(currentPage, 10, searchTerm);
+        setProjects(response.items || []);
+        setTotalPages(response.totalPages || 1);
       }
 
       setShowModal(false);
     } catch (error) {
-      console.error("Error saving project:", error);
+      console.error("Lỗi khi lưu dự án:", error);
       alert("Lưu dự án thất bại. Vui lòng thử lại!");
     }
   };
@@ -111,6 +156,7 @@ const ProjectManagement = () => {
             placeholder="Nhập tên dự án"
             className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+
           <button
             onClick={handleAddProject}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -125,6 +171,7 @@ const ProjectManagement = () => {
           <tr>
             <th className="py-2 px-4 border-b text-left">Mã dự án</th>
             <th className="py-2 px-4 border-b text-left">Tên dự án</th>
+            <th className="py-2 px-4 border-b text-left">Mô tả</th>
             <th className="py-2 px-4 border-b text-left">Trạng thái</th>
             <th className="py-2 px-4 border-b text-left">Hành động</th>
           </tr>
@@ -134,17 +181,18 @@ const ProjectManagement = () => {
             <tr key={project.maDuAn}>
               <td className="py-2 px-4 border-b">{project.maDuAn}</td>
               <td className="py-2 px-4 border-b">{project.tenDuAn}</td>
+              <td className="py-2 px-4 border-b">{project.moTa}</td>
               <td className="py-2 px-4 border-b">{project.trangThai}</td>
               <td className="py-2 px-4 border-b">
                 <button
                   onClick={() => handleEditProject(project)}
-                  className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 mr-2"
+                  className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 mr-2"
                 >
                   Sửa
                 </button>
                 <button
                   onClick={() => handleDeleteProject(project.maDuAn)}
-                  className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                 >
                   Xóa
                 </button>
@@ -158,7 +206,7 @@ const ProjectManagement = () => {
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50"
+          className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 disabled:opacity-50"
         >
           Trang trước
         </button>
@@ -168,7 +216,7 @@ const ProjectManagement = () => {
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50"
+          className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 disabled:opacity-50"
         >
           Trang sau
         </button>
@@ -183,36 +231,53 @@ const ProjectManagement = () => {
             <div className="space-y-4">
               <input
                 type="text"
-                name="tenDuAn"
                 value={currentProject.tenDuAn}
                 onChange={(e) =>
-                  setCurrentProject({ ...currentProject, tenDuAn: e.target.value })
+                  setCurrentProject({
+                    ...currentProject,
+                    tenDuAn: e.target.value,
+                  })
                 }
                 placeholder="Tên dự án"
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <select
-                name="trangThai"
-                value={currentProject.trangThai}
+              <textarea
+                value={currentProject.moTa}
                 onChange={(e) =>
-                  setCurrentProject({ ...currentProject, trangThai: e.target.value })
+                  setCurrentProject({ ...currentProject, moTa: e.target.value })
                 }
+                placeholder="Mô tả dự án"
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
+              />
+              
+              {/* Chỉ hiển thị trường trạng thái khi cập nhật */}
+              {currentProject.maDuAn && (
+                <select
+                  value={currentProject.trangThai}
+                  onChange={(e) =>
+                    setCurrentProject({
+                      ...currentProject,
+                      trangThai: e.target.value,
+                    })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="Bắt đầu">Bắt đầu</option>
+                  <option value="Kết Thúc">Kết Thúc</option>
+                </select>
+              )}
             </div>
+
             <div className="flex justify-end space-x-4 mt-4">
               <button
                 onClick={handleModalClose}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
               >
                 Hủy
               </button>
               <button
                 onClick={handleSaveProject}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
                 Lưu
               </button>
