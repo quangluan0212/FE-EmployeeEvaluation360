@@ -1,0 +1,110 @@
+import apiClient from './api';
+
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('Token không tồn tại');
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+};
+
+// Lấy danh sách nhóm có phân trang
+export const getDanhSachNhomPaged = async (page, pageSize, search = '') => {
+  try {
+    const response = await apiClient.get('/Nhom/danh-sach-nhom', {
+      headers: getAuthHeaders(),
+      params: { page, pageSize, search },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Lỗi lấy danh sách nhóm:', error);
+    throw error;
+  }
+};
+
+// Thêm nhóm
+export const addNhom = async (nhomData) => {
+  try {
+    const response = await apiClient.post('/Nhom/them-nhom', nhomData, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Lỗi khi thêm nhóm:', error);
+    throw error;
+  }
+};
+
+// Cập nhật nhóm
+export const updateNhom = async (maNhom, nhomData) => {
+  try {
+    const response = await apiClient.put(`/Nhom/cap-nhat-nhom`, nhomData, {
+      headers: getAuthHeaders(),
+      params:{
+        maNhom
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Lỗi khi cập nhật nhóm:', error);
+    throw error;
+  }
+};
+
+// Xóa nhóm
+export const deleteNhom = async (maNhom) => {
+  try {
+    const response = await apiClient.delete('/Nhom/xoa-nhom', {
+      headers: getAuthHeaders(),
+      params: { maNhom },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Lỗi khi xóa nhóm:', error);
+    throw error;
+  }
+};
+
+export const getDanhSachThanhVienNhom = async (maNhom, page = 1, pageSize = 10, search = '') => {
+  try {
+    const response = await apiClient.get('/Nhom/danh-sach-thanh-vien-nhom', {
+      headers: getAuthHeaders(),
+      params: { maNhom, page, pageSize, search }
+    });  
+   
+      return response.data;
+    
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách thành viên nhóm:', error);
+    throw error;
+  }
+};
+
+
+// Lấy danh sách thành viên theo nhóm (có phân trang)
+export const getThanhVienTheoNhom = async (maNhom, page, pageSize) => {
+  try {
+    const response = await apiClient.get('/Nhom/danh-sach-thanh-vien-nhom', {
+      headers: getAuthHeaders(),
+      params: { maNhom, page, pageSize },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách thành viên nhóm:', error);
+    throw error;
+  }
+};
+
+//xóa thành viên nhóm
+export const deleteThanhVien = async (maNhom, maNguoiDung) => {
+  try {
+    const response = await apiClient.delete('/Nhom/xoa-thanh-vien-nhom', {
+      headers: getAuthHeaders(),
+      params: { maNhom, maNguoiDung },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Lỗi khi xóa thành viên nhóm:', error);
+    throw error;
+  }
+};

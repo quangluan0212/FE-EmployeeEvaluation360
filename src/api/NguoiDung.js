@@ -1,4 +1,3 @@
-import { p, param } from "framer-motion/client";
 import apiClient from "./api";
 
 // Hàm gọi API login
@@ -178,3 +177,21 @@ export const adminUpdateEmployee = async (employeeId, updatedData) => {
     throw error;
   }
 };
+
+export const getAdminActive = async () => {
+  try {
+    const token = localStorage.getItem('authToken');
+    if(!token) throw new Error('Token không tồn tại');
+    const response = await apiClient.get(`NguoiDung/danh-sach-admin-active`,
+      {
+        headers:{
+          Authorization: `Bearer ${token}`,
+        }
+      }
+    )
+    return response.data;
+  } catch (error) {
+    console.log('Lỗi render admins: '. error);
+    throw error;
+  }
+}

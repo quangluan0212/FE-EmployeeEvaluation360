@@ -22,6 +22,22 @@ export const getProjectList = async (page, pageSize, search = "") => {
   }
 };
 
+export const getSimpleProjectList = async () => {
+  try {
+    const token = localStorage.getItem("authToken");
+    if (!token) throw new Error("Token không tồn tại");
+    const response = await apiClient.get("/DuAn/simple-danh-sach-du-an", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching project list:", error);
+    throw error;
+  }
+};
+
 // Add a new project
 export const addProject = async (projectData) => {
   try {

@@ -13,12 +13,12 @@ const DashboardLayout = () => {
 
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen ">
       {/* Sidebar */}
       <Sidebar userName={userName} roles={roles} />
 
       {/* Nội dung chính */}
-      <div className="flex-1 p-6 bg-gray-100">
+      <div className="flex-1 p-4 bg-gray-50">
         <Outlet />
       </div>
     </div>

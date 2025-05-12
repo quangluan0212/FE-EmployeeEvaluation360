@@ -1,211 +1,239 @@
-import React, { useEffect, useState } from 'react';
-import { getUserDetails, changePassword , updateUserInfo} from '../api/NguoiDung';
+"use client"
+
+import { useEffect, useState } from "react"
+import { getUserDetails, changePassword, updateUserInfo } from "../api/NguoiDung"
+import { Eye, EyeOff, User, Mail, Phone, Key, Save, X } from "lucide-react"
 
 const Profile = () => {
-  const [userDetails, setUserDetails] = useState(null);
-  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
-  const [showUpdateInfoModal, setShowUpdateInfoModal] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+  const [userDetails, setUserDetails] = useState(null)
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false)
+  const [showUpdateInfoModal, setShowUpdateInfoModal] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmNewPassword, setConfirmNewPassword] = useState("")
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false)
   const [updatedUserDetails, setUpdatedUserDetails] = useState({
-    hoTen: '',
-    email: '',
-    dienThoai: '',
-  });
+    hoTen: "",
+    email: "",
+    dienThoai: "",
+  })
 
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const data = await getUserDetails();
-        setUserDetails(data);
+        const data = await getUserDetails()
+        setUserDetails(data)
         setUpdatedUserDetails({
           hoTen: data.hoTen,
           email: data.email,
           dienThoai: data.dienThoai,
-        });
+        })
       } catch (error) {
-        console.error('Lỗi khi lấy thông tin người dùng:', error);
+        console.error("Lỗi khi lấy thông tin người dùng:", error)
       }
-    };
+    }
 
-    fetchUserDetails();
-  }, []);
+    fetchUserDetails()
+  }, [])
 
   const handleChangePassword = async () => {
     if (newPassword !== confirmNewPassword) {
-      alert('Mật khẩu mới và xác nhận mật khẩu không khớp!');
-      return;
+      alert("Mật khẩu mới và xác nhận mật khẩu không khớp!")
+      return
     }
 
     try {
-        await changePassword({ currentPassword, newPassword });
-        alert('Thay đổi mật khẩu thành công!');
-        setShowChangePasswordModal(false);
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmNewPassword('');
-      } catch (error) {
-        alert('Thay đổi mật khẩu thất bại. Vui lòng kiểm tra lại thông tin!');
-      }
-  };
+      await changePassword({ currentPassword, newPassword })
+      alert("Thay đổi mật khẩu thành công!")
+      setShowChangePasswordModal(false)
+      setCurrentPassword("")
+      setNewPassword("")
+      setConfirmNewPassword("")
+    } catch (error) {
+      alert("Thay đổi mật khẩu thất bại. Vui lòng kiểm tra lại thông tin!")
+    }
+  }
 
   const handleUpdateInfo = async () => {
-    console.log('Cập nhật thông tin:', updatedUserDetails);
-    try{
-      await updateUserInfo(updatedUserDetails);
-      alert('Cập nhật thông tin thành công!');
-      setShowUpdateInfoModal(false);
+    console.log("Cập nhật thông tin:", updatedUserDetails)
+    try {
+      await updateUserInfo(updatedUserDetails)
+      alert("Cập nhật thông tin thành công!")
+      setShowUpdateInfoModal(false)
+    } catch (error) {
+      alert("Cập nhật thông tin thất bại. Vui lòng kiểm tra lại thông tin!")
     }
-    catch (error) {
-      alert('Cập nhật thông tin thất bại. Vui lòng kiểm tra lại thông tin!');
-    }
-  };
+  }
 
   if (!userDetails) {
-    return <div>Đang tải thông tin...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500"></div>
+        <span className="ml-3 text-lg font-medium text-gray-700">Đang tải thông tin...</span>
+      </div>
+    )
   }
 
   return (
-    <div className="w-full mx-auto p-6 bg-white shadow-md rounded-md">
-      <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-6">
-        {/* Avatar */}
-        <div className="flex-shrink-0">
-          <img
-            src="/src/assets/avatar.png"
-            alt="Avatar"
-            className="w-32 h-32 rounded-full object-cover border-4 border-blue-300"
-          />
+    <div className="w-full mx-auto p-8 bg-gradient-to-br from-white to-gray-50 shadow-lg rounded-xl">
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+        {/* Avatar Section */}
+        <div className="flex flex-col items-center">
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full opacity-75 group-hover:opacity-100 blur transition duration-300"></div>
+            <img
+              src="/src/assets/avatar.png"
+              alt="Avatar"
+              className="relative w-36 h-36 rounded-full object-cover border-4 border-white shadow-md"
+            />
+          </div>
+          <div className="mt-4 text-center">
+            <h1 className="text-2xl font-bold text-gray-800">{userDetails.hoTen}</h1>
+            <p className="text-gray-500 text-sm mt-1">Mã người dùng: {userDetails.maNguoiDung}</p>
+          </div>
         </div>
 
         {/* User Details */}
-        <div className="flex-1 pl-4">
-          <h1 className="text-3xl font-bold text-black-800">{userDetails.hoTen}</h1>
-          <p className="text-black-600 mt-4">Mã người dùng: <span className="font-medium">{userDetails.maNguoiDung}</span></p>
-          <p className="text-black-600 mt-2">Email: <span className="font-medium">{userDetails.email}</span></p>
-          <p className="text-black-600 mt-2">Điện thoại: <span className="font-medium">{userDetails.dienThoai}</span></p>
-        </div>
-      </div>
+        <div className="flex-1 w-full">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <User className="w-5 h-5 mr-2 text-cyan-600" />
+              Thông tin cá nhân
+            </h2>
 
-      {/* Action Buttons */}
-      <div className="mt-8 flex justify-end space-x-4">
-        <button
-          onClick={() => setShowChangePasswordModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          Thay đổi mật khẩu
-        </button>
-        <button
-          onClick={() => setShowUpdateInfoModal(true)}
-          className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
-        >
-          Cập nhật thông tin
-        </button>
+            <div className="space-y-4">
+              <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+                <Mail className="w-5 h-5 text-cyan-600 mr-3" />
+                <div>
+                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="font-medium text-gray-800">{userDetails.email}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+                <Phone className="w-5 h-5 text-cyan-600 mr-3" />
+                <div>
+                  <p className="text-sm text-gray-500">Điện thoại</p>
+                  <p className="font-medium text-gray-800">{userDetails.dienThoai}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => setShowUpdateInfoModal(true)}
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50 flex items-center justify-center"
+              >
+                <User className="w-4 h-4 mr-2" />
+                Cập nhật thông tin
+              </button>
+              <button
+                onClick={() => setShowChangePasswordModal(true)}
+                className="flex-1 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-50 flex items-center justify-center"
+              >
+                <Key className="w-4 h-4 mr-2" />
+                Thay đổi mật khẩu
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Change Password Modal */}
       {showChangePasswordModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded shadow-md w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Thay đổi mật khẩu</h2>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md transform transition-all animate-fade-in-up">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-800 flex items-center">
+                <Key className="w-5 h-5 mr-2 text-cyan-600" />
+                Thay đổi mật khẩu
+              </h2>
+              <button
+                onClick={() => setShowChangePasswordModal(false)}
+                className="text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Mật khẩu hiện tại</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Mật khẩu hiện tại</label>
                 <div className="relative">
                   <input
-                    type={showCurrentPassword ? 'text' : 'password'}
+                    type={showCurrentPassword ? "text" : "password"}
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
+                    placeholder="Nhập mật khẩu hiện tại"
                   />
                   <button
                     type="button"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
                   >
-                    {showCurrentPassword ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-.274.857-.68 1.664-1.196 2.39M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7 .274-.857.68-1.664 1.196-2.39M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    )}
+                    {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700">Mật khẩu mới</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Mật khẩu mới</label>
                 <div className="relative">
                   <input
-                    type={showNewPassword ? 'text' : 'password'}
+                    type={showNewPassword ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
+                    placeholder="Nhập mật khẩu mới"
                   />
                   <button
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
                   >
-                    {showNewPassword ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-.274.857-.68 1.664-1.196 2.39M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7 .274-.857.68-1.664 1.196-2.39M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    )}
+                    {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700">Nhập lại mật khẩu mới</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nhập lại mật khẩu mới</label>
                 <div className="relative">
                   <input
-                    type={showConfirmNewPassword ? 'text' : 'password'}
+                    type={showConfirmNewPassword ? "text" : "password"}
                     value={confirmNewPassword}
                     onChange={(e) => setConfirmNewPassword(e.target.value)}
-                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
+                    placeholder="Nhập lại mật khẩu mới"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
                   >
-                    {showConfirmNewPassword ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-.274.857-.68 1.664-1.196 2.39M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7 .274-.857.68-1.664 1.196-2.39M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    )}
+                    {showConfirmNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
             </div>
-            <div className="mt-6 flex justify-end space-x-4">
-              <button
-                onClick={handleChangePassword}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Lưu
-              </button>
+
+            <div className="mt-6 flex justify-end space-x-3">
               <button
                 onClick={() => setShowChangePasswordModal(false)}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
               >
                 Hủy
+              </button>
+              <button
+                onClick={handleChangePassword}
+                className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all flex items-center"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Lưu thay đổi
               </button>
             </div>
           </div>
@@ -214,57 +242,76 @@ const Profile = () => {
 
       {/* Update Info Modal */}
       {showUpdateInfoModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded shadow-md w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Cập nhật thông tin</h2>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md transform transition-all animate-fade-in-up">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-800 flex items-center">
+                <User className="w-5 h-5 mr-2 text-cyan-600" />
+                Cập nhật thông tin
+              </h2>
+              <button
+                onClick={() => setShowUpdateInfoModal(false)}
+                className="text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Họ tên</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Họ tên</label>
                 <input
                   type="text"
                   value={updatedUserDetails.hoTen}
                   onChange={(e) => setUpdatedUserDetails({ ...updatedUserDetails, hoTen: e.target.value })}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
+                  placeholder="Nhập họ tên"
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input
                   type="email"
                   value={updatedUserDetails.email}
                   onChange={(e) => setUpdatedUserDetails({ ...updatedUserDetails, email: e.target.value })}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
+                  placeholder="Nhập email"
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700">Điện thoại</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Điện thoại</label>
                 <input
                   type="text"
                   value={updatedUserDetails.dienThoai}
                   onChange={(e) => setUpdatedUserDetails({ ...updatedUserDetails, dienThoai: e.target.value })}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
+                  placeholder="Nhập số điện thoại"
                 />
               </div>
             </div>
-            <div className="mt-6 flex justify-end space-x-4">
-              <button
-                onClick={handleUpdateInfo}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Lưu
-              </button>
+
+            <div className="mt-6 flex justify-end space-x-3">
               <button
                 onClick={() => setShowUpdateInfoModal(false)}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-all"
               >
                 Hủy
+              </button>
+              <button
+                onClick={handleUpdateInfo}
+                className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all flex items-center"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Lưu thay đổi
               </button>
             </div>
           </div>
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Profile;
+export default Profile
