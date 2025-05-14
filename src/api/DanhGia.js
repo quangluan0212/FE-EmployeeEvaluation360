@@ -1,21 +1,15 @@
 import apiClient from "./api";
 
-export const GetFormDanhGia = async (
-  nguoiDanhGia,
-  nguoiDuocDanhGia,
-  maDotDanhGia
-) => {
+export const GetFormDanhGia = async (maDanhGia) => {
   try {
     const token = localStorage.getItem("authToken");
     if (!token) throw console.error("Không có token !!!");
-    const response = await apiClient.get(`DanhGia/danh-gia`, {
+    const response = await apiClient.get(`DanhGia/get-form-danh-gia`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
       params: {
-        nguoiDanhGia,
-        nguoiDuocDanhGia,
-        maDotDanhGia,
+        maDanhGia,
       },
     });
     if (response.code == 200) {
@@ -36,6 +30,30 @@ export const getCurrentDotDanhGia = async () => {
         Authorization: `Bearer ${token}`,
       },
     });
+    if (response.code == 200) {
+      return response.data;
+    }
+  } catch (error) {
+    console.log("Có lỗi xảy ra,", error);
+    throw error;
+  }
+};
+
+export const AdminGetListDanhGiaLeader = async (maNguoiDung) => {
+  try {
+    const token = localStorage.getItem("authToken");
+    if (!token) throw console.error("Không có token !!!");
+    const response = await apiClient.get(
+      `DanhGia/admin-danh-sach-danh-gia-leader`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          maNguoiDung: maNguoiDung,
+        },
+      }
+    );
     if (response.code == 200) {
       return response.data;
     }
