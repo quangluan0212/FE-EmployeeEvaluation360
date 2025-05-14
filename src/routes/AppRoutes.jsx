@@ -11,6 +11,7 @@ import ProjectManagement from "../pages/ProjectManagement";
 import GroupManagement from "../pages/GroupManagement";
 import GroupMembers from "../pages/GroupMembers";
 import AdminEvaluation from "../pages/AdminEvaluation";
+import UserEvaluation from "../pages/UserEvaluation";
 
 const AppRoutes = () => {
   return (
@@ -26,6 +27,7 @@ const AppRoutes = () => {
           <Route path="/project-management" element={<ProjectManagement />} />
           <Route path="/group-management" element={<GroupManagement />} />
           <Route path="/admin-evaluations" element={<AdminEvaluation/>} />
+          <Route path="/user-evaluations" element={<UserEvaluation />} />
           <Route
             path="/group-management/:maNhom/members"
             element={<GroupMembers />}

@@ -6,6 +6,8 @@ import {
   getCurrentDotDanhGia,
   GetFormDanhGia,
   AdminGetListDanhGiaLeader,
+  submitDanhGia,
+  GetDanhGiaById,
 } from "../api/DanhGia";
 import {
   ClipboardList,
@@ -16,6 +18,7 @@ import {
   AlertCircle,
   Calendar,
   Loader2,
+  Save,
 } from "lucide-react";
 
 const AdminEvaluation = () => {
@@ -28,6 +31,7 @@ const AdminEvaluation = () => {
   const [selectedEvaluation, setSelectedEvaluation] = useState(null);
   const [answers, setAnswers] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [viewMode, setViewMode] = useState(false); // New state for view-only mode
   const maNguoiDung = localStorage.getItem("userId");
   const navigate = useNavigate();
 
@@ -43,6 +47,18 @@ const AdminEvaluation = () => {
     };
     return new Date(dateString).toLocaleDateString("vi-VN", options);
   };
+
+  // Set body overflow to hidden when the evaluation form is open
+  useEffect(() => {
+    if (showEvaluationForm) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [showEvaluationForm]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,12 +89,11 @@ const AdminEvaluation = () => {
       // Assuming the current user's ID is available (replace with actual user ID)
       const currentUserId = localStorage.getItem("userId");
 
-      const data = await GetFormDanhGia(
-        evaluation.maDanhGia
-      );
+      const data = await GetFormDanhGia(evaluation.maDanhGia);
 
       setEvaluationData(data);
       setSelectedEvaluation(evaluation);
+      setViewMode(false);
 
       // Initialize answers object with empty values
       const initialAnswers = {};
@@ -96,16 +111,81 @@ const AdminEvaluation = () => {
     }
   };
 
-  const handleEditEvaluation = (evaluation) => {
-    console.log("Edit evaluation:", evaluation);
-    alert(`Chỉnh sửa đánh giá cho ${evaluation.hotTen}`);
+  const handleEditEvaluation = async (evaluation) => {
+    try {
+      setSubmitting(true);
+
+      // Fetch the evaluation data by ID
+      const data = await GetDanhGiaById(evaluation.maDanhGia);
+
+      // Set up the evaluation form with existing data
+      setEvaluationData({
+        danhSachCauHoi: data.danhSachCauTraLoi.map((answer) => ({
+          maCauHoi: answer.maCauHoi,
+          noiDung: answer.noiDung,
+          diemToiDa: 10, // Assuming max score is 10, adjust if needed
+        })),
+      });
+
+      setSelectedEvaluation(evaluation);
+
+      // Initialize answers with existing values
+      const initialAnswers = {};
+      data.danhSachCauTraLoi.forEach((answer) => {
+        initialAnswers[answer.maCauHoi] = answer.traLoi;
+      });
+      setAnswers(initialAnswers);
+
+      setViewMode(false); // Edit mode
+      setShowEvaluationForm(true);
+    } catch (err) {
+      setError("Lỗi khi tải dữ liệu đánh giá.");
+      console.error(err);
+      alert("Không thể tải dữ liệu đánh giá. Vui lòng thử lại sau.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleViewEvaluation = (maNguoiDung) => {
-    navigate(`/view-evaluation/${maNguoiDung}`);
+  const handleViewEvaluation = async (evaluation) => {
+    try {
+      setSubmitting(true);
+
+      // Fetch the evaluation data by ID
+      const data = await GetDanhGiaById(evaluation.maDanhGia);
+
+      // Set up the evaluation form with existing data
+      setEvaluationData({
+        danhSachCauHoi: data.danhSachCauTraLoi.map((answer) => ({
+          maCauHoi: answer.maCauHoi,
+          noiDung: answer.noiDung,
+          diemToiDa: 10, // Assuming max score is 10, adjust if needed
+        })),
+      });
+
+      setSelectedEvaluation(evaluation);
+
+      // Initialize answers with existing values
+      const initialAnswers = {};
+      data.danhSachCauTraLoi.forEach((answer) => {
+        initialAnswers[answer.maCauHoi] = answer.traLoi;
+      });
+      setAnswers(initialAnswers);
+
+      setViewMode(true); // View-only mode
+      setShowEvaluationForm(true);
+    } catch (err) {
+      setError("Lỗi khi tải dữ liệu đánh giá.");
+      console.error(err);
+      alert("Không thể tải dữ liệu đánh giá. Vui lòng thử lại sau.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleAnswerChange = (questionId, value) => {
+    if (viewMode) return; // Prevent changes in view mode
+
     setAnswers((prev) => ({
       ...prev,
       [questionId]: value,
@@ -115,30 +195,27 @@ const AdminEvaluation = () => {
   const handleSubmitEvaluation = async () => {
     try {
       setSubmitting(true);
+
       const unansweredQuestions = Object.values(answers).filter(
         (value) => value === 0
       );
       if (unansweredQuestions.length > 0) {
         alert("Vui lòng trả lời tất cả các câu hỏi trước khi gửi đánh giá.");
-        setSubmitting(false);
         return;
       }
-      console.log("Submitting evaluation:", {
+
+      const formData = {
         maDanhGia: selectedEvaluation.maDanhGia,
-        nguoiDanhGia: "current_user_id",
-        nguoiDuocDanhGia: selectedEvaluation.maNguoiDanhGia,
-        maDotDanhGia: dotDanhGia.maDotDanhGia,
-        answers: answers,
-      });
+        cauHoiTraLoi: Object.entries(answers).map(([maCauHoi, traLoi]) => ({
+          maCauHoi: Number.parseInt(maCauHoi),
+          traLoi,
+        })),
+      };
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await submitDanhGia(formData);
 
-      // Close the form and show success message
       setShowEvaluationForm(false);
       alert("Đánh giá đã được gửi thành công!");
-
-      // Refresh the evaluation list
 
       const evaluationData = await AdminGetListDanhGiaLeader(maNguoiDung);
       setEvaluations(evaluationData);
@@ -155,6 +232,7 @@ const AdminEvaluation = () => {
     setEvaluationData(null);
     setSelectedEvaluation(null);
     setAnswers({});
+    setViewMode(false);
   };
 
   if (loading) {
@@ -205,12 +283,30 @@ const AdminEvaluation = () => {
     <div className="w-full min-h-screen relative">
       {/* Evaluation Form Modal */}
       {showEvaluationForm && evaluationData && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen sm:max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-start p-0 sm:p-4">
+          <div className="bg-white rounded-none sm:rounded-lg shadow-xl max-w-full sm:max-w-4xl w-full h-screen sm:h-auto max-h-screen sm:max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-800 flex items-center">
-                <ClipboardList className="h-5 w-5 mr-2 text-cyan-600" />
-                Đánh giá: {selectedEvaluation.hotTen}
+                {viewMode ? (
+                  <>
+                    <Eye className="h-5 w-5 mr-2 text-cyan-600" />
+                    Xem đánh giá: {selectedEvaluation.hotTen}
+                  </>
+                ) : (
+                  <>
+                    {selectedEvaluation.trangThai === "Chưa đánh giá" ? (
+                      <>
+                        <ClipboardList className="h-5 w-5 mr-2 text-cyan-600" />
+                        Đánh giá: {selectedEvaluation.hotTen}
+                      </>
+                    ) : (
+                      <>
+                        <Edit className="h-5 w-5 mr-2 text-cyan-600" />
+                        Chỉnh sửa đánh giá: {selectedEvaluation.hotTen}
+                      </>
+                    )}
+                  </>
+                )}
               </h2>
               <button
                 onClick={closeEvaluationForm}
@@ -221,16 +317,18 @@ const AdminEvaluation = () => {
             </div>
 
             <div className="px-6 py-4">
-              <div className="mb-6 bg-cyan-50 p-4 rounded-md border border-cyan-100">
-                <p className="text-sm text-cyan-700">
-                  <span className="font-medium">
-                    Xin các anh/chị hãy đánh giá đồng nghiệp một cách chân thành
-                    và khách quan — những góp ý xây dựng của anh/chị sẽ là động
-                    lực quý giá giúp công ty ngày càng vững mạnh và phát triển
-                    !!!
-                  </span>
-                </p>
-              </div>
+              {!viewMode && (
+                <div className="mb-6 bg-cyan-50 p-4 rounded-md border border-cyan-100">
+                  <p className="text-sm text-cyan-700">
+                    <span className="font-medium">
+                      Xin các anh/chị hãy đánh giá đồng nghiệp một cách chân
+                      thành và khách quan — những góp ý xây dựng của anh/chị sẽ
+                      là động lực quý giá giúp công ty ngày càng vững mạnh và
+                      phát triển !!!
+                    </span>
+                  </p>
+                </div>
+              )}
 
               <div className="space-y-6">
                 {evaluationData.danhSachCauHoi.map((question, index) => (
@@ -258,11 +356,14 @@ const AdminEvaluation = () => {
                             <label
                               key={i}
                               className={`
-                                flex items-center justify-center w-10 h-10 rounded-full cursor-pointer
+                                flex items-center justify-center w-10 h-10 rounded-full 
                                 ${
-                                  answers[question.maCauHoi] === value
+                                  viewMode &&
+                                  answers[question.maCauHoi] !== value
+                                    ? "bg-gray-100 text-gray-400 cursor-default"
+                                    : answers[question.maCauHoi] === value
                                     ? "bg-cyan-500 text-white"
-                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer"
                                 }
                                 transition-colors duration-200
                               `}
@@ -275,6 +376,7 @@ const AdminEvaluation = () => {
                                 onChange={() =>
                                   handleAnswerChange(question.maCauHoi, value)
                                 }
+                                disabled={viewMode}
                                 className="sr-only"
                               />
                               {value}
@@ -294,24 +396,32 @@ const AdminEvaluation = () => {
                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 mr-3"
                 disabled={submitting}
               >
-                Hủy
+                {viewMode ? "Đóng" : "Hủy"}
               </button>
-              <button
-                onClick={handleSubmitEvaluation}
-                className={`px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 ${
-                  submitting ? "opacity-70 cursor-not-allowed" : ""
-                }`}
-                disabled={submitting}
-              >
-                {submitting ? (
-                  <span className="flex items-center">
-                    <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
-                    Đang gửi...
-                  </span>
-                ) : (
-                  "Gửi đánh giá"
-                )}
-              </button>
+
+              {!viewMode && (
+                <button
+                  onClick={handleSubmitEvaluation}
+                  className={`px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 ${
+                    submitting ? "opacity-70 cursor-not-allowed" : ""
+                  }`}
+                  disabled={submitting}
+                >
+                  {submitting ? (
+                    <span className="flex items-center">
+                      <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
+                      Đang gửi...
+                    </span>
+                  ) : (
+                    <span className="flex items-center">
+                      <Save className="h-4 w-4 mr-2" />
+                      {selectedEvaluation.trangThai === "Chưa đánh giá"
+                        ? "Gửi đánh giá"
+                        : "Cập nhật đánh giá"}
+                    </span>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -427,7 +537,6 @@ const AdminEvaluation = () => {
                               </button>
                             ) : (
                               <>
-                                {" "}
                                 <button
                                   onClick={() =>
                                     handleEditEvaluation(evaluation)
@@ -439,9 +548,7 @@ const AdminEvaluation = () => {
                                 </button>
                                 <button
                                   onClick={() =>
-                                    handleViewEvaluation(
-                                      evaluation.maNguoiDanhGia
-                                    )
+                                    handleViewEvaluation(evaluation)
                                   }
                                   className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-cyan-700 bg-cyan-50 hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
                                 >

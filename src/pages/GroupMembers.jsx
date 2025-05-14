@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getDanhSachThanhVienNhom, deleteThanhVien } from "../api/Nhom"; // Assuming there's a delete API
+import { getDanhSachThanhVienNhom, deleteThanhVien } from "../api/Nhom";
 
 const GroupMembers = () => {
-  const { maNhom } = useParams(); // Get the group ID from URL params
-  const navigate = useNavigate(); // To navigate back or to other pages
+  const { maNhom } = useParams();
+  const navigate = useNavigate();
   const [members, setMembers] = useState([]);
   const [membersPage, setMembersPage] = useState(1);
   const [membersPageSize, setMembersPageSize] = useState(10);

@@ -18,7 +18,7 @@ const DashboardLayout = () => {
       <Sidebar userName={userName} roles={roles} />
 
       {/* Nội dung chính */}
-      <div className="flex-1 p-4 bg-gray-50">
+      <div className="flex-1 p-4 bg-gray-50 h-full overflow-y-auto">
         <Outlet />
       </div>
     </div>

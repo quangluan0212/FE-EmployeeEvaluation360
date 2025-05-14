@@ -116,21 +116,21 @@ const EnhancedSidebar = ({ userName, roles }) => {
           {isLeader && (
             <>
               <SidebarItem
-                to="/evaluations"
+                to="/user-evaluations"
                 icon={<ClipboardCheck size={20} />}
-                text="Đánh giá chéo"
+                text="Đánh giá"
                 collapsed={collapsed}
-              />
-              <SidebarItem
-                to="/evaluations"
-                icon={<FileText size={20} />}
-                text="Tự đánh giá"
-                collapsed={collapsed}
-              />
+              />             
               <SidebarItem
                 to="/evaluations"
                 icon={<ClipboardCheck size={20} />}
                 text="Kết quả đánh giá"
+                collapsed={collapsed}
+              />
+              <SidebarItem
+                to="/leader-group-members"
+                icon={<Group size={20} />}
+                text="Nhóm"
                 collapsed={collapsed}
               />
             </>
@@ -140,15 +140,9 @@ const EnhancedSidebar = ({ userName, roles }) => {
           {!isAdmin && !isLeader && (
             <>
               <SidebarItem
-                to="/evaluations"
+                to="/user-evaluations"
                 icon={<ClipboardCheck size={20} />}
-                text="Đánh giá chéo"
-                collapsed={collapsed}
-              />
-              <SidebarItem
-                to="/evaluations"
-                icon={<FileText size={20} />}
-                text="Tự đánh giá"
+                text="Đánh giá"
                 collapsed={collapsed}
               />
               <SidebarItem
