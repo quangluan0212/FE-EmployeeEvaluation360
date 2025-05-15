@@ -8,21 +8,7 @@ import {
   GetDanhGiaById,
   UserGetListDanhGia,
 } from "../api/DanhGia";
-import {
-  ClipboardList,
-  Edit,
-  Eye,
-  X,
-  CheckCircle,
-  AlertCircle,
-  Calendar,
-  Loader2,
-  Save,
-  Users,
-  User,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
+import { ClipboardList, Edit, Eye, X, CheckCircle, AlertCircle, Calendar, Loader2, Save, Users, User, ChevronDown, ChevronUp, UserCheck } from 'lucide-react';
 
 const UserEvaluation = () => {
   const [groupsData, setGroupsData] = useState([]);
@@ -37,7 +23,7 @@ const UserEvaluation = () => {
   const [viewMode, setViewMode] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState({});
   const maNguoiDung = localStorage.getItem("userId");
-
+  
   // Format date to display
   const formatDate = (dateString) => {
     const options = {
@@ -268,6 +254,11 @@ const UserEvaluation = () => {
     return { total, completed, percentage };
   };
 
+  // Check if an evaluation is a self-evaluation
+  const isSelfEvaluation = (member) => {
+    return member.maNguoiDuocDanhGia === maNguoiDung;
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 py-12 px-4">
@@ -342,6 +333,12 @@ const UserEvaluation = () => {
                   <>
                     <Eye className="h-5 w-5 mr-2 text-cyan-600" />
                     Xem đánh giá: {selectedEvaluation.hoTen}
+                    {isSelfEvaluation(selectedEvaluation) && (
+                      <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        <UserCheck className="h-3 w-3 mr-1" />
+                        Tự đánh giá
+                      </span>
+                    )}
                   </>
                 ) : (
                   <>
@@ -349,11 +346,23 @@ const UserEvaluation = () => {
                       <>
                         <ClipboardList className="h-5 w-5 mr-2 text-cyan-600" />
                         Đánh giá: {selectedEvaluation.hoTen}
+                        {isSelfEvaluation(selectedEvaluation) && (
+                          <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            <UserCheck className="h-3 w-3 mr-1" />
+                            Tự đánh giá
+                          </span>
+                        )}
                       </>
                     ) : (
                       <>
                         <Edit className="h-5 w-5 mr-2 text-cyan-600" />
                         Chỉnh sửa đánh giá: {selectedEvaluation.hoTen}
+                        {isSelfEvaluation(selectedEvaluation) && (
+                          <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            <UserCheck className="h-3 w-3 mr-1" />
+                            Tự đánh giá
+                          </span>
+                        )}
                       </>
                     )}
                   </>
@@ -369,13 +378,20 @@ const UserEvaluation = () => {
 
             <div className="px-6 py-4">
               {!viewMode && (
-                <div className="mb-6 bg-cyan-50 p-4 rounded-md border border-cyan-100">
-                  <p className="text-sm text-cyan-700">
+                <div className={`mb-6 p-4 rounded-md border ${
+                  isSelfEvaluation(selectedEvaluation) 
+                    ? "bg-purple-50 border-purple-100" 
+                    : "bg-cyan-50 border-cyan-100"
+                }`}>
+                  <p className={`text-sm ${
+                    isSelfEvaluation(selectedEvaluation) 
+                      ? "text-purple-700" 
+                      : "text-cyan-700"
+                  }`}>
                     <span className="font-medium">
-                      Xin các anh/chị hãy đánh giá đồng nghiệp một cách chân
-                      thành và khách quan — những góp ý xây dựng của anh/chị sẽ
-                      là động lực quý giá giúp công ty ngày càng vững mạnh và
-                      phát triển !!!
+                      {isSelfEvaluation(selectedEvaluation) 
+                        ? "Đây là phần tự đánh giá. Hãy đánh giá bản thân một cách khách quan và trung thực để giúp cải thiện năng lực của chính mình."
+                        : "Xin các anh/chị hãy đánh giá đồng nghiệp một cách chân thành và khách quan — những góp ý xây dựng của anh/chị sẽ là động lực quý giá giúp công ty ngày càng vững mạnh và phát triển !!!"}
                     </span>
                   </p>
                 </div>
@@ -414,7 +430,9 @@ const UserEvaluation = () => {
                                   answers[question.maCauHoi] !== value
                                     ? "bg-gray-100 text-gray-400 cursor-default"
                                     : answers[question.maCauHoi] === value
-                                    ? "bg-cyan-500 text-white"
+                                    ? isSelfEvaluation(selectedEvaluation)
+                                      ? "bg-purple-500 text-white"
+                                      : "bg-cyan-500 text-white"
                                     : "bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer"
                                 }
                                 transition-colors duration-200
@@ -454,7 +472,13 @@ const UserEvaluation = () => {
               {!viewMode && (
                 <button
                   onClick={handleSubmitEvaluation}
-                  className={`px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 ${
+                  className={`px-4 py-2 rounded-md text-sm font-medium text-white ${
+                    isSelfEvaluation(selectedEvaluation)
+                      ? "bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600"
+                      : "bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600"
+                  } focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                    isSelfEvaluation(selectedEvaluation) ? "focus:ring-purple-500" : "focus:ring-cyan-500"
+                  } ${
                     submitting ? "opacity-70 cursor-not-allowed" : ""
                   }`}
                   disabled={submitting}
@@ -486,7 +510,7 @@ const UserEvaluation = () => {
             <div>
               <h1 className="text-2xl font-bold text-gray-800 flex items-center">
                 <Users className="h-6 w-6 mr-2 text-cyan-600" />
-                Đánh giá nhóm
+                Đánh giá nhóm & Tự đánh giá
               </h1>
             </div>
 
@@ -603,80 +627,111 @@ const UserEvaluation = () => {
                             </td>
                           </tr>
                         ) : (
-                          group.thanhViens.map((member) => (
-                            <tr
-                              key={member.maDanhGia}
-                              className="hover:bg-gray-50"
-                            >
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {member.maDanhGia}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                                {member.hoTen}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {member.tenChucVu}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                {member.trangThai === "Chưa đánh giá" ? (
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                    <AlertCircle className="h-3 w-3 mr-1" />
-                                    {member.trangThai}
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    <CheckCircle className="h-3 w-3 mr-1" />
-                                    {member.trangThai}
-                                  </span>
-                                )}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div className="flex justify-end space-x-2">
-                                  {member.trangThai === "Chưa đánh giá" ? (
-                                    <button
-                                      onClick={() => handleEvaluate(member)}
-                                      disabled={submitting}
-                                      className={`inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 ${
-                                        submitting
-                                          ? "opacity-50 cursor-not-allowed"
-                                          : ""
-                                      }`}
-                                    >
-                                      <ClipboardList className="h-4 w-4 mr-1.5" />
-                                      <span className="hidden sm:inline">
-                                        Đánh giá
+                          group.thanhViens.map((member) => {
+                            const isSelf = isSelfEvaluation(member);
+                            return (
+                              <tr
+                                key={member.maDanhGia}
+                                className={`hover:bg-gray-50 ${
+                                  isSelf ? "bg-purple-50" : ""
+                                }`}
+                              >
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                  {member.maDanhGia}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                                  <div className="flex items-center">
+                                    {member.hoTen}
+                                    {isSelf && (
+                                      <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        <UserCheck className="h-3 w-3 mr-1" />
+                                        Tự đánh giá
                                       </span>
-                                    </button>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {member.tenChucVu}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  {member.trangThai === "Chưa đánh giá" ? (
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                      <AlertCircle className="h-3 w-3 mr-1" />
+                                      {member.trangThai}
+                                    </span>
                                   ) : (
-                                    <>
-                                      <button
-                                        onClick={() =>
-                                          handleEditEvaluation(member)
-                                        }
-                                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-amber-700 bg-amber-50 hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
-                                      >
-                                        <Edit className="h-4 w-4 mr-1.5" />
-                                        <span className="hidden sm:inline">
-                                          Sửa
-                                        </span>
-                                      </button>
-                                      <button
-                                        onClick={() =>
-                                          handleViewEvaluation(member)
-                                        }
-                                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-cyan-700 bg-cyan-50 hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500"
-                                      >
-                                        <Eye className="h-4 w-4 mr-1.5" />
-                                        <span className="hidden sm:inline">
-                                          Xem
-                                        </span>
-                                      </button>
-                                    </>
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                      <CheckCircle className="h-3 w-3 mr-1" />
+                                      {member.trangThai}
+                                    </span>
                                   )}
-                                </div>
-                              </td>
-                            </tr>
-                          ))
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                  <div className="flex justify-end space-x-2">
+                                    {member.trangThai === "Chưa đánh giá" ? (
+                                      <button
+                                        onClick={() => handleEvaluate(member)}
+                                        disabled={submitting}
+                                        className={`inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white ${
+                                          isSelf
+                                            ? "bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600"
+                                            : "bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600"
+                                        } focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                                          isSelf ? "focus:ring-purple-500" : "focus:ring-cyan-500"
+                                        } ${
+                                          submitting
+                                            ? "opacity-50 cursor-not-allowed"
+                                            : ""
+                                        }`}
+                                      >
+                                        <ClipboardList className="h-4 w-4 mr-1.5" />
+                                        <span className="hidden sm:inline">
+                                          Đánh giá
+                                        </span>
+                                      </button>
+                                    ) : (
+                                      <>
+                                        <button
+                                          onClick={() =>
+                                            handleEditEvaluation(member)
+                                          }
+                                          className={`inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md ${
+                                            isSelf
+                                              ? "text-purple-700 bg-purple-50 hover:bg-purple-100"
+                                              : "text-amber-700 bg-amber-50 hover:bg-amber-100"
+                                          } focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                                            isSelf ? "focus:ring-purple-500" : "focus:ring-amber-500"
+                                          }`}
+                                        >
+                                          <Edit className="h-4 w-4 mr-1.5" />
+                                          <span className="hidden sm:inline">
+                                            Sửa
+                                          </span>
+                                        </button>
+                                        <button
+                                          onClick={() =>
+                                            handleViewEvaluation(member)
+                                          }
+                                          className={`inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md ${
+                                            isSelf
+                                              ? "text-purple-700 bg-purple-50 hover:bg-purple-100"
+                                              : "text-cyan-700 bg-cyan-50 hover:bg-cyan-100"
+                                          } focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                                            isSelf ? "focus:ring-purple-500" : "focus:ring-cyan-500"
+                                          }`}
+                                        >
+                                          <Eye className="h-4 w-4 mr-1.5" />
+                                          <span className="hidden sm:inline">
+                                            Xem
+                                          </span>
+                                        </button>
+                                      </>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })
                         )}
                       </tbody>
                     </table>

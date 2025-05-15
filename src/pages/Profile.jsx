@@ -1,84 +1,90 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { getUserDetails, changePassword, updateUserInfo } from "../api/NguoiDung"
-import { Eye, EyeOff, User, Mail, Phone, Key, Save, X } from "lucide-react"
+import { useEffect, useState } from "react";
+import {
+  getUserDetails,
+  changePassword,
+  updateUserInfo,
+} from "../api/NguoiDung";
+import { Eye, EyeOff, User, Mail, Phone, Key, Save, X } from "lucide-react";
 
 const Profile = () => {
-  const [userDetails, setUserDetails] = useState(null)
-  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false)
-  const [showUpdateInfoModal, setShowUpdateInfoModal] = useState(false)
-  const [currentPassword, setCurrentPassword] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmNewPassword, setConfirmNewPassword] = useState("")
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
-  const [showNewPassword, setShowNewPassword] = useState(false)
-  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false)
+  const [userDetails, setUserDetails] = useState(null);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [showUpdateInfoModal, setShowUpdateInfoModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
   const [updatedUserDetails, setUpdatedUserDetails] = useState({
     hoTen: "",
     email: "",
     dienThoai: "",
-  })
+  });
 
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const data = await getUserDetails()
-        setUserDetails(data)
+        const data = await getUserDetails();
+        setUserDetails(data);
         setUpdatedUserDetails({
           hoTen: data.hoTen,
           email: data.email,
           dienThoai: data.dienThoai,
-        })
+        });
       } catch (error) {
-        console.error("Lỗi khi lấy thông tin người dùng:", error)
+        console.error("Lỗi khi lấy thông tin người dùng:", error);
       }
-    }
+    };
 
-    fetchUserDetails()
-  }, [])
+    fetchUserDetails();
+  }, []);
 
   const handleChangePassword = async () => {
     if (newPassword !== confirmNewPassword) {
-      alert("Mật khẩu mới và xác nhận mật khẩu không khớp!")
-      return
+      alert("Mật khẩu mới và xác nhận mật khẩu không khớp!");
+      return;
     }
 
     try {
-      await changePassword({ currentPassword, newPassword })
-      alert("Thay đổi mật khẩu thành công!")
-      setShowChangePasswordModal(false)
-      setCurrentPassword("")
-      setNewPassword("")
-      setConfirmNewPassword("")
+      await changePassword({ currentPassword, newPassword });
+      alert("Thay đổi mật khẩu thành công!");
+      setShowChangePasswordModal(false);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
     } catch (error) {
-      alert("Thay đổi mật khẩu thất bại. Vui lòng kiểm tra lại thông tin!")
+      alert("Thay đổi mật khẩu thất bại. Vui lòng kiểm tra lại thông tin!");
     }
-  }
+  };
 
   const handleUpdateInfo = async () => {
-    console.log("Cập nhật thông tin:", updatedUserDetails)
+    console.log("Cập nhật thông tin:", updatedUserDetails);
     try {
-      await updateUserInfo(updatedUserDetails)
-      alert("Cập nhật thông tin thành công!")
-      setShowUpdateInfoModal(false)
+      await updateUserInfo(updatedUserDetails);
+      alert("Cập nhật thông tin thành công!");
+      setShowUpdateInfoModal(false);
     } catch (error) {
-      alert("Cập nhật thông tin thất bại. Vui lòng kiểm tra lại thông tin!")
+      alert("Cập nhật thông tin thất bại. Vui lòng kiểm tra lại thông tin!");
     }
-  }
+  };
 
   if (!userDetails) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500"></div>
-        <span className="ml-3 text-lg font-medium text-gray-700">Đang tải thông tin...</span>
+        <span className="ml-3 text-lg font-medium text-gray-700">
+          Đang tải thông tin...
+        </span>
       </div>
-    )
+    );
   }
 
   return (
     <div className="w-full mx-auto p-8 bg-gradient-to-br from-white to-gray-50 shadow-lg rounded-xl">
-      <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+      <div className="flex flex-col md:flex-row items-center md:items-start w-full gap-8">
         {/* Avatar Section */}
         <div className="flex flex-col items-center">
           <div className="relative group">
@@ -90,8 +96,12 @@ const Profile = () => {
             />
           </div>
           <div className="mt-4 text-center">
-            <h1 className="text-2xl font-bold text-gray-800">{userDetails.hoTen}</h1>
-            <p className="text-gray-500 text-sm mt-1">Mã người dùng: {userDetails.maNguoiDung}</p>
+            <h1 className="text-2xl font-bold text-gray-800">
+              {userDetails.hoTen}
+            </h1>
+            <p className="text-gray-500 text-sm mt-1">
+              Mã người dùng: {userDetails.maNguoiDung}
+            </p>
           </div>
         </div>
 
@@ -108,7 +118,9 @@ const Profile = () => {
                 <Mail className="w-5 h-5 text-cyan-600 mr-3" />
                 <div>
                   <p className="text-sm text-gray-500">Email</p>
-                  <p className="font-medium text-gray-800">{userDetails.email}</p>
+                  <p className="font-medium text-gray-800">
+                    {userDetails.email}
+                  </p>
                 </div>
               </div>
 
@@ -116,7 +128,9 @@ const Profile = () => {
                 <Phone className="w-5 h-5 text-cyan-600 mr-3" />
                 <div>
                   <p className="text-sm text-gray-500">Điện thoại</p>
-                  <p className="font-medium text-gray-800">{userDetails.dienThoai}</p>
+                  <p className="font-medium text-gray-800">
+                    {userDetails.dienThoai}
+                  </p>
                 </div>
               </div>
             </div>
@@ -161,7 +175,9 @@ const Profile = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Mật khẩu hiện tại</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mật khẩu hiện tại
+                </label>
                 <div className="relative">
                   <input
                     type={showCurrentPassword ? "text" : "password"}
@@ -175,13 +191,19 @@ const Profile = () => {
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                     className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
                   >
-                    {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showCurrentPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
                   </button>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Mật khẩu mới</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mật khẩu mới
+                </label>
                 <div className="relative">
                   <input
                     type={showNewPassword ? "text" : "password"}
@@ -195,13 +217,19 @@ const Profile = () => {
                     onClick={() => setShowNewPassword(!showNewPassword)}
                     className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
                   >
-                    {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showNewPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
                   </button>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nhập lại mật khẩu mới</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nhập lại mật khẩu mới
+                </label>
                 <div className="relative">
                   <input
                     type={showConfirmNewPassword ? "text" : "password"}
@@ -212,10 +240,16 @@ const Profile = () => {
                   />
                   <button
                     type="button"
-                    onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
+                    onClick={() =>
+                      setShowConfirmNewPassword(!showConfirmNewPassword)
+                    }
                     className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
                   >
-                    {showConfirmNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showConfirmNewPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -259,33 +293,54 @@ const Profile = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Họ tên</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Họ tên
+                </label>
                 <input
                   type="text"
                   value={updatedUserDetails.hoTen}
-                  onChange={(e) => setUpdatedUserDetails({ ...updatedUserDetails, hoTen: e.target.value })}
+                  onChange={(e) =>
+                    setUpdatedUserDetails({
+                      ...updatedUserDetails,
+                      hoTen: e.target.value,
+                    })
+                  }
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
                   placeholder="Nhập họ tên"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
                 <input
                   type="email"
                   value={updatedUserDetails.email}
-                  onChange={(e) => setUpdatedUserDetails({ ...updatedUserDetails, email: e.target.value })}
+                  onChange={(e) =>
+                    setUpdatedUserDetails({
+                      ...updatedUserDetails,
+                      email: e.target.value,
+                    })
+                  }
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
                   placeholder="Nhập email"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Điện thoại</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Điện thoại
+                </label>
                 <input
                   type="text"
                   value={updatedUserDetails.dienThoai}
-                  onChange={(e) => setUpdatedUserDetails({ ...updatedUserDetails, dienThoai: e.target.value })}
+                  onChange={(e) =>
+                    setUpdatedUserDetails({
+                      ...updatedUserDetails,
+                      dienThoai: e.target.value,
+                    })
+                  }
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
                   placeholder="Nhập số điện thoại"
                 />
@@ -311,7 +366,7 @@ const Profile = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Profile
+export default Profile;

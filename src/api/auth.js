@@ -16,25 +16,16 @@ export const decodeToken = (token) => {
 };
 
 export const getUserRolesFromToken = (token) => {
-    const decoded = decodeToken(token); 
-    if (!decoded) return [];
-  
-    
-    return decoded.role || [];
-  };
+  const decoded = decodeToken(token);
+  if (!decoded) return [];
 
-// Hàm lấy thông tin người dùng từ token
-export const getUserIdInfoFromToken = (token) => {
-  const MaNguoiDung = jwtDecode(token).maNguoiDung;
-  if (!decoded) return null;
-
-  return {
-    MaNguoiDung: MaNguoiDung  };
+  return decoded.role || [];
 };
 
 // Hàm xóa token khỏi localStorage
 export const removeToken = () => {
-  localStorage.removeItem('authToken');
-  localStorage.removeItem('userId');
-  localStorage.removeItem('userName');
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("userId");
+  localStorage.removeItem("userName");
+  localStorage.removeItem("roles");
 };

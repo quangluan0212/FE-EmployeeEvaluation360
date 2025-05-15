@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import {
   BarChart3,
   ClipboardCheck,
+  ChartCandlestick,
   Users,
   Briefcase,
   UserCircle,
@@ -13,7 +14,6 @@ import {
   Settings,
   UserCheck,
   Group,
-  FileText,
   Menu,
 } from "lucide-react";
 import { removeToken } from "../api/auth";
@@ -73,6 +73,12 @@ const EnhancedSidebar = ({ userName, roles }) => {
           {isAdmin && (
             <>
               <SidebarItem
+                to="/evaluation-period-management"
+                icon={<ChartCandlestick size={20} />}
+                text="Đợt đánh giá"
+                collapsed={collapsed}
+              />
+              <SidebarItem
                 to="/evaluations"
                 icon={<BarChart3 size={20} />}
                 text="Chi tiết đánh giá"
@@ -120,7 +126,7 @@ const EnhancedSidebar = ({ userName, roles }) => {
                 icon={<ClipboardCheck size={20} />}
                 text="Đánh giá"
                 collapsed={collapsed}
-              />             
+              />
               <SidebarItem
                 to="/evaluations"
                 icon={<ClipboardCheck size={20} />}

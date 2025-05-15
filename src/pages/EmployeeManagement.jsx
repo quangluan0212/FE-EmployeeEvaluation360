@@ -93,7 +93,6 @@ const EmployeeManagement = () => {
       await addEmployee(newEmployee)
       alert("Thêm nhân viên thành công!")
       handleModalClose()
-      // Refresh the employee list
       const response = await getEmployeeList(currentPage, 10)
       setEmployees(response.items)
     } catch (error) {
