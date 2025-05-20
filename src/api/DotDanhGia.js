@@ -88,7 +88,7 @@ export const EndDotDanhGia = async (maDotDanhGia) => {
   }
 };
 
-export const getCurrentDotDanh = async () => {
+export const getCurrentDotDanhGia = async () => {
   try {
     const token = localStorage.getItem("authToken");
     if (!token) throw console.error("Không có token !!!");

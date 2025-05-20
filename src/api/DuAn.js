@@ -1,6 +1,5 @@
 import apiClient from "./api";
 
-// Fetch project list
 export const getProjectList = async (page, pageSize, search = "") => {
   try {
     const token = localStorage.getItem("authToken");

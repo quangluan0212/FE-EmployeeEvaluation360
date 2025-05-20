@@ -1,4 +1,3 @@
-import { form } from "framer-motion/client";
 import apiClient from "./api";
 
 export const GetFormDanhGia = async (maDanhGia) => {

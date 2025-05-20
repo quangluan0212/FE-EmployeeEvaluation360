@@ -10,6 +10,7 @@ import {
   Briefcase,
   UserCircle,
   LogOut,
+  NotepadTextDashed,
   ChevronRight,
   Settings,
   UserCheck,
@@ -76,6 +77,12 @@ const EnhancedSidebar = ({ userName, roles }) => {
                 to="/evaluation-period-management"
                 icon={<ChartCandlestick size={20} />}
                 text="Đợt đánh giá"
+                collapsed={collapsed}
+              />
+                 <SidebarItem
+                to="/evaluation-template-management"
+                icon={<NotepadTextDashed size={20} />}
+                text="Mẫu đánh giá"
                 collapsed={collapsed}
               />
               <SidebarItem

@@ -14,6 +14,7 @@ import GroupMembers from "../pages/GroupMembers";
 import AdminEvaluation from "../pages/AdminEvaluation";
 import UserEvaluation from "../pages/UserEvaluation";
 import EvaluationPeriodManagement from "../pages/EvaluationPeriodManagement";
+import EvaluationTemplateManagement from "../pages/EvaluationTemplateManagement";
 import NotFound from "../pages/NotFound";
 
 const AppRoutes = () => {
@@ -72,6 +73,14 @@ const AppRoutes = () => {
             element={
               <PrivateRoute role="Admin">
                 <EvaluationPeriodManagement />
+              </PrivateRoute>
+            }
+          />
+            <Route
+            path="/evaluation-template-management"
+            element={
+              <PrivateRoute role="Admin">
+                <EvaluationTemplateManagement />
               </PrivateRoute>
             }
           />
