@@ -68,8 +68,8 @@ export const EndDotDanhGia = async (maDotDanhGia) => {
   try {
     const token = localStorage.getItem("authToken");
     if (!token) throw console.error("Không có token !!!");
-    const response = await apiClient.post(
-      `DotDanhGia/admin-ket-thuc-dot-danh-gia`,
+    const response = await apiClient.put(
+      `DotDanhGia/admin-ket-thuc-dot-danh-gia`, null,
       {
         headers: {
           Authorization: `Bearer ${token}`,

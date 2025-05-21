@@ -141,7 +141,7 @@ const EnhancedSidebar = ({ userName, roles }) => {
                 collapsed={collapsed}
               />
               <SidebarItem
-                to="/leader-group-members"
+                to="/group-members-page"
                 icon={<Group size={20} />}
                 text="Nhóm"
                 collapsed={collapsed}

@@ -15,6 +15,8 @@ import AdminEvaluation from "../pages/AdminEvaluation";
 import UserEvaluation from "../pages/UserEvaluation";
 import EvaluationPeriodManagement from "../pages/EvaluationPeriodManagement";
 import EvaluationTemplateManagement from "../pages/EvaluationTemplateManagement";
+import ForgotPasswordPage from "../pages/ForgotPasswordPage";
+import GroupMembersPage from "../pages/GroupMembersPage";
 import NotFound from "../pages/NotFound";
 
 const AppRoutes = () => {
@@ -23,9 +25,18 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="" element={<DashboardLayout />}>
           <Route path="/profile" element={<Profile />} />
           <Route path="/evaluations" element={<Evaluations />} />
+          <Route
+            path="/group-members-page"
+            element={
+              <PrivateRoute role="Leader">
+                <GroupMembersPage />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/employee-management"
             element={
@@ -76,7 +87,7 @@ const AppRoutes = () => {
               </PrivateRoute>
             }
           />
-            <Route
+          <Route
             path="/evaluation-template-management"
             element={
               <PrivateRoute role="Admin">
