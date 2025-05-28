@@ -17,6 +17,7 @@ import EvaluationPeriodManagement from "../pages/EvaluationPeriodManagement";
 import EvaluationTemplateManagement from "../pages/EvaluationTemplateManagement";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import GroupMembersPage from "../pages/GroupMembersPage";
+import AdminDashboard from "../pages/AdminDashboard";
 import NotFound from "../pages/NotFound";
 
 const AppRoutes = () => {
@@ -29,6 +30,14 @@ const AppRoutes = () => {
         <Route path="" element={<DashboardLayout />}>
           <Route path="/profile" element={<Profile />} />
           <Route path="/evaluations" element={<Evaluations />} />
+          <Route
+            path="/admin-dashboard"
+            element={
+              <PrivateRoute role="Admin">
+                <AdminDashboard />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/group-members-page"
             element={

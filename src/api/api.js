@@ -3,7 +3,7 @@ import { getToken } from './auth';
 
 // Create an Axios instance
 const apiClient = axios.create({
-    // baseURL: 'http://192.168.86.2:5000/api', //npm run dev -- --host
+    // baseURL: 'http://192.168.100.66:5000/api', //npm run dev -- --host
     baseURL: 'http://localhost:5294/api', // npm run dev
     timeout: 10000, // Request timeout in milliseconds
     headers: {

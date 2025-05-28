@@ -12,16 +12,24 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  
 
   useEffect(() => {
     if (location.pathname === "/login") {
       const token = getToken();
       if (token) {
         const decoded = decodeToken(token);
+        const roles = token ? getUserRolesFromToken(token) : [];
         const currentTime = Math.floor(Date.now() / 1000);
         if (decoded && decoded.exp > currentTime) {
           console.log("Token hợp lệ, chuyển hướng tới /profile");
-          setTimeout(() => navigate("/profile"), 1000);
+          setTimeout(() => {
+            if (roles.includes("Admin")) {
+              navigate("/admin-dashboard");
+            } else {
+              navigate("/profile");
+            }
+          }, 1000);
         }
       }
     }
@@ -52,7 +60,11 @@ const LoginPage = () => {
       const roles = token ? getUserRolesFromToken(token) : [];
       localStorage.setItem("roles", JSON.stringify(roles));
       setMessage("Đăng nhập thành công!");
-      navigate("/profile");
+      if (roles.includes("Admin")) {
+        navigate("/admin-dashboard");
+      } else {
+        navigate("/profile");
+      }
     } catch (error) {
       setMessage("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
       console.error("Login failed:", error);
