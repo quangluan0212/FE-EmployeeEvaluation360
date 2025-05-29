@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  getAllKetQuaDanhGia,
-  getLatestQuaDanhGia,
-  getGoodQuaDanhGia,
+  getAllKetQuaDanhGiaPaged,
+  getLatestQuaDanhGiaPaged,
+  getGoodQuaDanhGiaPaged,
+  getBadQuaDanhGiaPaged,
   getBadQuaDanhGia,
+  getGoodQuaDanhGia,
+  getLatestQuaDanhGia,
 } from "../api/KetQuaDanhGia";
 
 const ITEMS_PER_PAGE = 10;
@@ -60,7 +63,11 @@ const AdminDashboard = () => {
         search,
       });
 
-      const allRes = await getAllKetQuaDanhGia(page, ITEMS_PER_PAGE, search);
+      const allRes = await getAllKetQuaDanhGiaPaged(
+        page,
+        ITEMS_PER_PAGE,
+        search
+      );
       console.log("All evaluations response:", allRes);
 
       if (allRes && allRes.items) {
@@ -104,7 +111,11 @@ const AdminDashboard = () => {
         isModal,
       });
 
-      const latestRes = await getLatestQuaDanhGia(page, ITEMS_PER_PAGE, search);
+      const latestRes = await getLatestQuaDanhGiaPaged(
+        page,
+        ITEMS_PER_PAGE,
+        search
+      );
       console.log(
         "Latest evaluations FULL response:",
         JSON.stringify(latestRes, null, 2)
@@ -176,7 +187,11 @@ const AdminDashboard = () => {
         isModal,
       });
 
-      const bestRes = await getGoodQuaDanhGia(page, ITEMS_PER_PAGE, search);
+      const bestRes = await getGoodQuaDanhGiaPaged(
+        page,
+        ITEMS_PER_PAGE,
+        search
+      );
       console.log(
         "Best evaluations FULL response:",
         JSON.stringify(bestRes, null, 2)
@@ -246,7 +261,11 @@ const AdminDashboard = () => {
         isModal,
       });
 
-      const worstRes = await getBadQuaDanhGia(page, ITEMS_PER_PAGE, search);
+      const worstRes = await getBadQuaDanhGiaPaged(
+        page,
+        ITEMS_PER_PAGE,
+        search
+      );
       console.log(
         "Worst evaluations FULL response:",
         JSON.stringify(worstRes, null, 2)
@@ -318,19 +337,77 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleExportToExcel = (data, title) => {
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, title);
+  const handleExportToExcel = async (modalType, title) => {
+    try {
+      let data = [];
 
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(blob, `${title}.xlsx`);
+      // Gọi API tương ứng
+      if (modalType === "latest") {
+        const response = await getLatestQuaDanhGia();
+        data = response || [];
+      } else if (modalType === "best") {
+        const response = await getGoodQuaDanhGia();
+        data = response || [];
+      } else if (modalType === "worst") {
+        const response = await getBadQuaDanhGia();
+        data = response || [];
+      }
+
+      if (!data.length) {
+        console.log("No data to export for", modalType);
+        return;
+      }
+
+      // Định dạng dữ liệu
+      const formattedData = data.map((item) => ({
+        "Mã đánh giá": item.maKetQuaDanhGia || "N/A",
+        "Họ tên": item.hoTen || "N/A",
+        "Đợt đánh giá": item.tenDotDanhGia || "N/A",
+        "Điểm tổng": item.diemTongKet !== undefined ? item.diemTongKet : "N/A",
+        "Thời gian đánh giá": item.thoiGianTinh
+          ? formatDate(item.thoiGianTinh)
+          : "N/A",
+      }));
+
+      // Tạo worksheet
+      const worksheet = XLSX.utils.json_to_sheet(formattedData);
+
+      // Thêm tiêu đề báo cáo
+      const reportTitle = `BÁO CÁO ${modalType.toUpperCase()} - ${new Date().toLocaleDateString(
+        "vi-VN"
+      )}`;
+      XLSX.utils.sheet_add_aoa(worksheet, [[reportTitle]], { origin: "A1" });
+      worksheet["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 4 } }];
+
+      // Điều chỉnh độ rộng cột
+      worksheet["!cols"] = [
+        { wch: 20 },
+        { wch: 30 },
+        { wch: 25 },
+        { wch: 15 },
+        { wch: 25 },
+      ];
+
+      // Rút ngắn tên sheet nếu vượt quá 31 ký tự
+      const safeTitle = title.length > 31 ? title.substring(0, 31) : title;
+
+      // Tạo workbook
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, safeTitle);
+
+      // Xuất file
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+      const blob = new Blob([excelBuffer], {
+        type: "application/octet-stream",
+      });
+      saveAs(blob, `${title}.xlsx`);
+    } catch (error) {
+      console.error(`Error exporting ${modalType} to Excel:`, error);
+    }
   };
-
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     const options = {
@@ -450,7 +527,10 @@ const AdminDashboard = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleExportToExcel(latestEvaluation, "Danh_sach_danh_gia");
+                  handleExportToExcel(
+                    "latest",
+                    "Danh_sach_kqdg_dot_nay"
+                  );
                 }}
                 className="flex items-center text-sm text-gray-500 hover:text-cyan-600"
               >
@@ -483,8 +563,8 @@ const AdminDashboard = () => {
                 onClick={(e) => {
                   e.stopPropagation();
                   handleExportToExcel(
-                    bestEvaluation ? [bestEvaluation] : [],
-                    "Danh_sach_danh_gia_tot"
+                    "best",
+                    "Danh_sach_kqdg_tot_dot_nay"
                   );
                 }}
                 className="flex items-center text-sm text-gray-500 hover:text-green-600"
@@ -518,8 +598,8 @@ const AdminDashboard = () => {
                 onClick={(e) => {
                   e.stopPropagation();
                   handleExportToExcel(
-                    worstEvaluation ? [worstEvaluation] : [],
-                    "Danh_sach_danh_gia_kem"
+                    "worst",
+                    "Danh_sach_kqdg_kem_dot_nay"
                   );
                 }}
                 className="flex items-center text-sm text-gray-500 hover:text-red-600"
@@ -664,7 +744,7 @@ const AdminDashboard = () => {
                 <button
                   onClick={() => {
                     handleExportToExcel(
-                      modalData,
+                      showModal,
                       `Danh_sach_danh_gia_${showModal}`
                     );
                   }}
