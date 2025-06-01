@@ -137,7 +137,6 @@ const GroupMembersPage = () => {
                   <User className="h-5 w-5 mr-2 text-cyan-600" />
                   <h2 className="text-lg font-semibold text-gray-800">
                     Nhóm: <span className="text-cyan-700">{group.tenNhom}</span>{" "}
-                    (Mã nhóm: {group.maNhom})
                   </h2>
                 </div>
                 <div className="flex items-center">

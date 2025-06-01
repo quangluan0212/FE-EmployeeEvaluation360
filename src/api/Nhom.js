@@ -8,6 +8,38 @@ const getAuthHeaders = () => {
   };
 };
 
+// Thêm thành viên vào nhóm
+export const addThanhVienVaoNhom = async (nhomData) => {
+  try {
+    const response = await apiClient.post("/Nhom/them-thanh-vien-vao-nhom", nhomData, {
+      headers: getAuthHeaders(),
+    });
+    return response;
+  } catch (error) {
+    console.error("Lỗi khi thêm thành viên vào nhóm:", error);
+    throw error;
+  }
+};
+
+//Lấy danh sách người dùng không có trong nhóm
+export const getDanhSachNguoiDungKhongCoTrongNhom = async (
+  maNhom,
+) => {
+  try {
+    const response = await apiClient.get(
+      "/Nhom/danh-sach-nguoi-dung-khong-co-trong-nhom",
+      {
+        headers: getAuthHeaders(),
+        params: { maNhom },
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách người dùng không có trong nhóm:", error);
+    throw error;
+  }
+};
+
 // Lấy danh sách nhóm có phân trang
 export const getDanhSachNhomPaged = async (page, pageSize, search = "") => {
   try {
