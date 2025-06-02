@@ -8,10 +8,26 @@ const getAuthHeaders = () => {
   };
 };
 
+export const getUserKetQuaDanhGia = async (maNguoiDung) => {
+  try {
+    const response = await apiClient.get(
+      "/KetQuaDanhGia/user-get-ket-qua-danh-gia",
+      {
+        headers: getAuthHeaders(),
+        params: { maNguoiDung },
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error fetching user Ket Qua Danh Gia:", error);
+    throw error;
+  }
+};
 export const getAllKetQuaDanhGiaPaged = async (
   page = 1,
   pageSize = 10,
-  search = ""
+  search = "",
+  maDotDanhGia = null
 ) => {
   try {
     const response = await apiClient.get(
@@ -22,6 +38,7 @@ export const getAllKetQuaDanhGiaPaged = async (
           page,
           pageSize,
           search,
+          maDotDanhGia,
         },
       }
     );
@@ -34,7 +51,8 @@ export const getAllKetQuaDanhGiaPaged = async (
 export const getLatestQuaDanhGiaPaged = async (
   page = 1,
   pageSize = 10,
-  search = ""
+  search = "",
+  maDotDanhGia = null
 ) => {
   try {
     const response = await apiClient.get(
@@ -45,6 +63,7 @@ export const getLatestQuaDanhGiaPaged = async (
           page,
           pageSize,
           search,
+          maDotDanhGia,
         },
       }
     );
@@ -57,7 +76,8 @@ export const getLatestQuaDanhGiaPaged = async (
 export const getGoodQuaDanhGiaPaged = async (
   page = 1,
   pageSize = 10,
-  search = ""
+  search = "",
+  maDotDanhGia = null
 ) => {
   try {
     const response = await apiClient.get(
@@ -68,6 +88,7 @@ export const getGoodQuaDanhGiaPaged = async (
           page,
           pageSize,
           search,
+          maDotDanhGia,
         },
       }
     );
@@ -80,7 +101,8 @@ export const getGoodQuaDanhGiaPaged = async (
 export const getBadQuaDanhGiaPaged = async (
   page = 1,
   pageSize = 10,
-  search = ""
+  search = "",
+  maDotDanhGia = null
 ) => {
   try {
     const response = await apiClient.get(
@@ -91,6 +113,7 @@ export const getBadQuaDanhGiaPaged = async (
           page,
           pageSize,
           search,
+          maDotDanhGia,
         },
       }
     );
@@ -101,12 +124,15 @@ export const getBadQuaDanhGiaPaged = async (
   }
 };
 //excel
-export const getAllKetQuaDanhGia = async () => {
+export const getAllKetQuaDanhGia = async (maDotDanhGia) => {
   try {
     const response = await apiClient.get(
       "/KetQuaDanhGia/get-all-ket-qua-danh-gia",
       {
         headers: getAuthHeaders(),
+        params: {
+          maDotDanhGia,
+        },
       }
     );
     return response.data;
@@ -115,12 +141,15 @@ export const getAllKetQuaDanhGia = async () => {
     throw error;
   }
 };
-export const getLatestQuaDanhGia = async () => {
+export const getLatestQuaDanhGia = async (maDotDanhGia) => {
   try {
     const response = await apiClient.get(
       "/KetQuaDanhGia/get-latest-ket-qua-danh-gia",
       {
         headers: getAuthHeaders(),
+        params: {
+          maDotDanhGia,
+        },
       }
     );
     return response.data;
@@ -129,12 +158,15 @@ export const getLatestQuaDanhGia = async () => {
     throw error;
   }
 };
-export const getGoodQuaDanhGia = async () => {
+export const getGoodQuaDanhGia = async (maDotDanhGia) => {
   try {
     const response = await apiClient.get(
       "/KetQuaDanhGia/get-good-ket-qua-danh-gia",
       {
         headers: getAuthHeaders(),
+        params: {
+          maDotDanhGia,
+        },
       }
     );
     return response.data;
@@ -143,12 +175,15 @@ export const getGoodQuaDanhGia = async () => {
     throw error;
   }
 };
-export const getBadQuaDanhGia = async () => {
+export const getBadQuaDanhGia = async (maDotDanhGia) => {
   try {
     const response = await apiClient.get(
       "/KetQuaDanhGia/get-bad-ket-qua-danh-gia",
       {
         headers: getAuthHeaders(),
+        params: {
+          maDotDanhGia,
+        },
       }
     );
     return response.data;

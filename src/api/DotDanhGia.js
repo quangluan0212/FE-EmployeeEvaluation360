@@ -1,5 +1,29 @@
 import apiClient from "./api";
 
+export const GetDotDanhGiaByYear = async (year) => {
+  try {
+    const token = localStorage.getItem("authToken");
+    if (!token) throw console.error("Không có token !!!");
+    const response = await apiClient.get(
+      `DotDanhGia/get-danh-sach-dot-danh-gia-theo-nam`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          year: year,
+        },
+      }
+    );
+    if (response.code == 200) {
+      return response.data;
+    }
+  } catch (error) {
+    console.log("Có lỗi xảy ra,", error);
+    throw error;
+  }
+}
+
 export const GetListDotDanhGia = async () => {
   try {
     const token = localStorage.getItem("authToken");
