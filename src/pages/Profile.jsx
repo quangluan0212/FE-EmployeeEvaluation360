@@ -90,7 +90,7 @@ const Profile = () => {
           <div className="relative group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full opacity-75 group-hover:opacity-100 blur transition duration-300"></div>
             <img
-              src="/src/assets/avatar.png"
+              src="/avatar.png"
               alt="Avatar"
               className="relative w-36 h-36 rounded-full object-cover border-4 border-white shadow-md"
             />

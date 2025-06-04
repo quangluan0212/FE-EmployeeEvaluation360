@@ -212,7 +212,7 @@ const ForgotPasswordPage = () => {
       <div className="hidden lg:flex lg:w-3/5 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-600 opacity-60"></div>
         <img
-          src="/src/assets/login1.png"
+          src="/login1.png"
           alt="Workspace collaboration"
           className="h-full w-full object-cover"
         />
@@ -233,7 +233,7 @@ const ForgotPasswordPage = () => {
         <div className="w-full h-scr p-8">
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
-            <img src="/src/assets/logo.png" alt="Logo" className="h-16 mb-4" />
+            <img src="/logo-header.png" alt="Logo" className="h-16 mb-4" />
             <h2 className="text-3xl font-bold text-blue-900">Khôi phục mật khẩu</h2>
             <p className="mt-2 text-sm text-blue-600">
               Nhập thông tin để lấy lại quyền truy cập

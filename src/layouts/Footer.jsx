@@ -6,7 +6,7 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <img src="/src/assets/logo.png" alt="Viet An Logo" className="h-12 w-auto mb-4"/>
+            <img src="/logo.png" alt="Viet An Logo" className="h-12 w-auto mb-4"/>
             <p className="text-sm text-gray-300 mt-4">
               Công ty phần mềm Việt An chuyên cung cấp các giải pháp công nghệ thông tin tiên tiến cho doanh nghiệp.
             </p>

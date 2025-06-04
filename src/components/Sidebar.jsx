@@ -44,7 +44,7 @@ const EnhancedSidebar = ({ userName, roles }) => {
       <div className="flex items-center justify-between p-4 border-b border-gray-700">
         {!collapsed && (
           <img
-            src="/src/assets/logo.png"
+            src="/logo-header.png"
             alt="Viet An Logo"
             className="h-10 w-auto"
           />
