@@ -15,7 +15,7 @@ const slides = [
     description:
       "Dựa trên khả năng phân tích, tận dụng, khai phá, dự báo và đề xuất hành động, chúng tôi hỗ trợ khách hàng làm chủ dữ liệu và năng suất.",
     gradient: "from-[#00B2C2] via-[#7CD4E0] to-[#E6F7FA]",
-    image: "/src/assets/slide1.png",
+    image: "/slide1.png",
     buttonColor: "bg-cyan-600 hover:bg-cyan-700",
     dotColor: "bg-cyan-500",
   },
@@ -26,7 +26,7 @@ const slides = [
     description:
       "Chúng tôi cung cấp các công cụ phân tích dữ liệu tiên tiến giúp doanh nghiệp của bạn đưa ra quyết định sáng suốt dựa trên thông tin chính xác và kịp thời.",
     gradient: "from-[#2563EB] via-[#60A5FA] to-[#E0F2FE]",
-    image: "/src/assets/slide2.png",
+    image: "/slide2.png",
     buttonColor: "bg-cyan-600 hover:bg-cyan-700",
     dotColor: "bg-cyan-500",
   },
@@ -37,7 +37,7 @@ const slides = [
     description:
       "Giải pháp tự động hóa thông minh giúp doanh nghiệp tiết kiệm thời gian, giảm chi phí vận hành và tăng hiệu quả công việc trong mọi lĩnh vực.",
     gradient: "from-[#059669] via-[#34D399] to-[#ECFDF5]",
-    image: "/src/assets/slide3.png",
+    image: "/slide3.png",
     buttonColor: "bg-cyan-600 hover:bg-cyan-700",
     dotColor: "bg-cyan-500",
   },

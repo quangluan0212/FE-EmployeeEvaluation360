@@ -80,7 +80,7 @@ const LoginPage = () => {
       <div className="hidden lg:flex lg:w-3/5 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-500 opacity-50"></div>
         <img
-          src="/src/assets/login1.png"
+          src="/login1.png"
           alt="Workspace collaboration"
           className="h-full w-full object-cover"
         />
@@ -102,7 +102,7 @@ const LoginPage = () => {
         <div className="w-full max-w-md bg-white p-10">
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
-            <img src="/src/assets/logo.png" alt="Logo" className="h-16 mb-4" />
+            <img src="/logo-header.png" alt="Logo" className="h-16 mb-4" />
             <h2 className="text-3xl font-bold text-blue-900">Đăng nhập</h2>
             <p className="mt-2 text-sm text-blue-600">
               Nhập thông tin đăng nhập để tiếp tục

@@ -24,7 +24,7 @@ const Header = () => {
   return (
     <header className="container mx-auto px-4 py-4 flex items-center justify-between">
       <div className="flex items-center">
-        <img src="/src/assets/logo.png" alt="Viet An Logo" className="h-12 w-auto" />
+        <img src="/logo-header.png" alt="Viet An Logo" className="h-12 w-auto" />
       </div>
       <div className="flex items-center space-x-8">
         <nav className="hidden md:flex items-center space-x-8">
