@@ -6,7 +6,7 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <img src="/logo.png" alt="Viet An Logo" className="h-12 w-auto mb-4"/>
+            <img src="/logo-header.png" alt="Viet An Logo" className="h-12 w-auto mb-4"/>
             <p className="text-sm text-gray-300 mt-4">
               Công ty phần mềm Việt An chuyên cung cấp các giải pháp công nghệ thông tin tiên tiến cho doanh nghiệp.
             </p>
@@ -67,10 +67,10 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Liên Hệ</h3>
             <address className="not-italic text-gray-300">
-              <p>123 Đường Nguyễn Văn Linh</p>
-              <p>Quận 7, TP. Hồ Chí Minh</p>
-              <p className="mt-2">Email: info@vietan.com</p>
-              <p>Điện thoại: (028) 1234 5678</p>
+              <p>Thôn Hữu Hòa</p>
+              <p>Triệu Hòa, Triệu Phong, Quảng Trị</p>
+              <p className="mt-2">Email: quangluan0212@gmail.com</p>
+              <p>Điện thoại: 0334 586 712</p>
             </address>
           </div>
         </div>
