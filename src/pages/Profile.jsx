@@ -112,7 +112,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="h-full w-full bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 py-4 px-4">
+    <div className="h-full w-full py-4 px-4">
       <div className="w-full h-full mx-auto">
         {/* Header Section */}
         <div className="text-center mb-8">

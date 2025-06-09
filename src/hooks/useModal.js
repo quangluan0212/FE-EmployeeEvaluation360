@@ -3,8 +3,8 @@ import {
   fetchLatestEvaluations,
   fetchBestEvaluation,
   fetchWorstEvaluation,
+  fetchAllNguoiChuaDanhGia,
 } from "../api/ApiHandlers";
-// import { getLatestQuaDanhGiaPaged, getGoodQuaDanhGiaPaged, getBadQuaDanhGiaPaged } from "../api/ApiHandlers";
 
 const useModal = (selectedMaDotDanhGia) => {
   const [showModal, setShowModal] = useState(null);
@@ -31,6 +31,8 @@ const useModal = (selectedMaDotDanhGia) => {
           () => {},
           () => {}
         );
+        setModalData(data.items || []);
+        setModalTotalPages(data.totalPages || 1);
       } else if (modalType === "best") {
         data = await fetchBestEvaluation(
           1,
@@ -40,6 +42,8 @@ const useModal = (selectedMaDotDanhGia) => {
           () => {},
           () => {}
         );
+        setModalData(data.items || []);
+        setModalTotalPages(data.totalPages || 1);
       } else if (modalType === "worst") {
         data = await fetchWorstEvaluation(
           1,
@@ -49,11 +53,21 @@ const useModal = (selectedMaDotDanhGia) => {
           () => {},
           () => {}
         );
+        setModalData(data.items || []);
+        setModalTotalPages(data.totalPages || 1);
+      } else if (modalType === "nguoiChuaDanhGia") {
+        data = await fetchAllNguoiChuaDanhGia(
+          selectedMaDotDanhGia || null,
+          () => {},
+          () => {}
+        );
+        setModalData(data || []);
+        setModalTotalPages(1); // Không phân trang
       }
-      setModalData(data.items || []);
-      setModalTotalPages(data.totalPages || 1);
     } catch (error) {
       console.error(`Lỗi khi tải dữ liệu ${modalType}:`, error);
+      setModalData([]);
+      setModalTotalPages(1);
     } finally {
       setModalLoading(false);
     }
@@ -61,6 +75,10 @@ const useModal = (selectedMaDotDanhGia) => {
 
   const closeModal = () => {
     setShowModal(null);
+    setModalData([]);
+    setModalSearchQuery("");
+    setModalCurrentPage(1);
+    setModalTotalPages(1);
   };
 
   const handleModalSearch = async () => {
@@ -77,6 +95,8 @@ const useModal = (selectedMaDotDanhGia) => {
           () => {},
           () => {}
         );
+        setModalData(data.items || []);
+        setModalTotalPages(data.totalPages || 1);
       } else if (showModal === "best") {
         data = await fetchBestEvaluation(
           1,
@@ -86,6 +106,8 @@ const useModal = (selectedMaDotDanhGia) => {
           () => {},
           () => {}
         );
+        setModalData(data.items || []);
+        setModalTotalPages(data.totalPages || 1);
       } else if (showModal === "worst") {
         data = await fetchWorstEvaluation(
           1,
@@ -95,11 +117,28 @@ const useModal = (selectedMaDotDanhGia) => {
           () => {},
           () => {}
         );
+        setModalData(data.items || []);
+        setModalTotalPages(data.totalPages || 1);
+      } else if (showModal === "nguoiChuaDanhGia") {
+        data = await fetchAllNguoiChuaDanhGia(
+          selectedMaDotDanhGia || null,
+          () => {},
+          () => {}
+        );
+        const filteredData = data.filter(
+          (item) =>
+            item.hoTen.toLowerCase().includes(modalSearchQuery.toLowerCase()) ||
+            item.maNguoiDung
+              .toLowerCase()
+              .includes(modalSearchQuery.toLowerCase())
+        );
+        setModalData(filteredData || []);
+        setModalTotalPages(1); // Không phân trang
       }
-      setModalData(data.items || []);
-      setModalTotalPages(data.totalPages || 1);
     } catch (error) {
       console.error(`Lỗi khi tìm kiếm ${showModal}:`, error);
+      setModalData([]);
+      setModalTotalPages(1);
     } finally {
       setModalLoading(false);
     }
@@ -119,6 +158,8 @@ const useModal = (selectedMaDotDanhGia) => {
           () => {},
           () => {}
         );
+        setModalData(data.items || []);
+        setModalTotalPages(data.totalPages || 1);
       } else if (showModal === "best") {
         data = await fetchBestEvaluation(
           newPage,
@@ -128,6 +169,8 @@ const useModal = (selectedMaDotDanhGia) => {
           () => {},
           () => {}
         );
+        setModalData(data.items || []);
+        setModalTotalPages(data.totalPages || 1);
       } else if (showModal === "worst") {
         data = await fetchWorstEvaluation(
           newPage,
@@ -137,11 +180,28 @@ const useModal = (selectedMaDotDanhGia) => {
           () => {},
           () => {}
         );
+        setModalData(data.items || []);
+        setModalTotalPages(data.totalPages || 1);
+      } else if (showModal === "nguoiChuaDanhGia") {
+        data = await fetchAllNguoiChuaDanhGia(
+          selectedMaDotDanhGia || null,
+          () => {},
+          () => {}
+        );
+        const filteredData = data.filter(
+          (item) =>
+            item.hoTen.toLowerCase().includes(modalSearchQuery.toLowerCase()) ||
+            item.maNguoiDung
+              .toLowerCase()
+              .includes(modalSearchQuery.toLowerCase())
+        );
+        setModalData(filteredData || []);
+        setModalTotalPages(1); // Không phân trang
       }
-      setModalData(data.items || []);
-      setModalTotalPages(data.totalPages || 1);
     } catch (error) {
       console.error(`Lỗi khi chuyển trang ${showModal}:`, error);
+      setModalData([]);
+      setModalTotalPages(1);
     } finally {
       setModalLoading(false);
     }
@@ -152,6 +212,7 @@ const useModal = (selectedMaDotDanhGia) => {
     modalData,
     modalLoading,
     modalSearchQuery,
+    setModalSearchQuery,
     modalCurrentPage,
     modalTotalPages,
     openModal,
@@ -160,7 +221,6 @@ const useModal = (selectedMaDotDanhGia) => {
     handleModalPageChange,
     setModalData,
     setModalTotalPages,
-    setModalSearchQuery,
   };
 };
 

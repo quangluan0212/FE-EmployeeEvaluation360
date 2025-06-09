@@ -8,6 +8,8 @@ import {
   ChartCandlestick,
   Users,
   Briefcase,
+  CalendarRange,
+  LayoutDashboard,
   UserCircle,
   LogOut,
   NotepadTextDashed,
@@ -75,13 +77,13 @@ const EnhancedSidebar = ({ userName, roles }) => {
             <>
               <SidebarItem
                 to="/admin-dashboard"
-                icon={<ChartCandlestick size={20} />}
+                icon={<LayoutDashboard size={20} />}
                 text="Dashboard"
                 collapsed={collapsed}
               />
-              <SidebarItem
+              <SidebarItem 
                 to="/evaluation-period-management"
-                icon={<ChartCandlestick size={20} />}
+                icon={<CalendarRange size={20} />}
                 text="Đợt đánh giá"
                 collapsed={collapsed}
               />
@@ -92,7 +94,7 @@ const EnhancedSidebar = ({ userName, roles }) => {
                 collapsed={collapsed}
               />
               <SidebarItem
-                to="/evaluations"
+                to="/admin-details-evaluation"
                 icon={<BarChart3 size={20} />}
                 text="Chi tiết đánh giá"
                 collapsed={collapsed}

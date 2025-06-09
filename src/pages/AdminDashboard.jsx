@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -6,10 +8,10 @@ import {
   fetchBestEvaluation,
   fetchWorstEvaluation,
   fetchDotDanhGia,
+  fetchAllNguoiChuaDanhGia,
 } from "../api/ApiHandlers";
 import useModal from "../hooks/useModal";
 import { handleExportToExcel } from "../utils/exportUtils";
-import StatsCard from "../components/StatsCard";
 import EvaluationsTable from "../components/EvaluationsTable";
 import EvaluationModal from "../components/EvaluationModal";
 import {
@@ -17,8 +19,14 @@ import {
   Trophy,
   AlertTriangle,
   AlertCircle,
-  Table,
-  Loader2,
+  UserX,
+  BarChart3,
+  TrendingUp,
+  Calendar,
+  Filter,
+  Download,
+  ArrowLeft,
+  RefreshCw,
 } from "lucide-react";
 
 const ITEMS_PER_PAGE = 10;
@@ -27,6 +35,7 @@ const AdminDashboard = () => {
   const [totalLatestEvaluations, setTotalLatestEvaluations] = useState(0);
   const [totalBestEvaluations, setTotalBestEvaluations] = useState(0);
   const [totalWorstEvaluations, setTotalWorstEvaluations] = useState(0);
+  const [totalNguoiChuaDanhGia, setTotalNguoiChuaDanhGia] = useState(0);
   const [allEvaluations, setAllEvaluations] = useState([]);
   const [filteredEvaluations, setFilteredEvaluations] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,6 +44,7 @@ const AdminDashboard = () => {
     latest: true,
     best: true,
     worst: true,
+    nguoiChuaDanhGia: true,
   });
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -59,6 +69,7 @@ const AdminDashboard = () => {
     handleModalPageChange,
     setModalData,
     setModalTotalPages,
+    setModalSearchQuery,
   } = useModal(selectedMaDotDanhGia);
 
   // Tạo danh sách năm
@@ -120,6 +131,13 @@ const AdminDashboard = () => {
           setError
         );
         setTotalWorstEvaluations(worstData.totalCount || 0);
+
+        const nguoiChuaDanhGiaData = await fetchAllNguoiChuaDanhGia(
+          selectedMaDotDanhGia,
+          setLoading,
+          setError
+        );
+        setTotalNguoiChuaDanhGia(nguoiChuaDanhGiaData.length || 0);
       } catch (err) {
         setError(err.message || "Lỗi khi tải dữ liệu ban đầu.");
       }
@@ -148,6 +166,12 @@ const AdminDashboard = () => {
     await fetchLatestEvaluations(1, "", false, null, setLoading, setError);
     await fetchBestEvaluation(1, "", false, null, setLoading, setError);
     await fetchWorstEvaluation(1, "", false, null, setLoading, setError);
+    const nguoiChuaDanhGiaData = await fetchAllNguoiChuaDanhGia(
+      null,
+      setLoading,
+      setError
+    );
+    setTotalNguoiChuaDanhGia(nguoiChuaDanhGiaData.length || 0);
   };
 
   const handleDotDanhGiaChange = async (maDotDanhGia) => {
@@ -186,6 +210,12 @@ const AdminDashboard = () => {
       setLoading,
       setError
     );
+    const nguoiChuaDanhGiaData = await fetchAllNguoiChuaDanhGia(
+      maDotDanhGia || null,
+      setLoading,
+      setError
+    );
+    setTotalNguoiChuaDanhGia(nguoiChuaDanhGiaData.length || 0);
   };
 
   const handleSearch = async () => {
@@ -201,25 +231,108 @@ const AdminDashboard = () => {
     setTotalPages(allData.totalPages || 1);
   };
 
-  if (loading.all || loading.latest || loading.best || loading.worst) {
+  const refreshData = async () => {
+    setLoading({
+      all: true,
+      latest: true,
+      best: true,
+      worst: true,
+      nguoiChuaDanhGia: true,
+    });
+    const allData = await fetchAllEvaluations(
+      currentPage,
+      searchQuery,
+      selectedMaDotDanhGia,
+      setLoading,
+      setError
+    );
+    setAllEvaluations(allData.items || []);
+    setFilteredEvaluations(allData.items || []);
+    setTotalPages(allData.totalPages || 1);
+
+    const latestData = await fetchLatestEvaluations(
+      1,
+      "",
+      false,
+      selectedMaDotDanhGia,
+      setLoading,
+      setError
+    );
+    setTotalLatestEvaluations(latestData.totalCount || 0);
+
+    const bestData = await fetchBestEvaluation(
+      1,
+      "",
+      false,
+      selectedMaDotDanhGia,
+      setLoading,
+      setError
+    );
+    setTotalBestEvaluations(bestData.totalCount || 0);
+
+    const worstData = await fetchWorstEvaluation(
+      1,
+      "",
+      false,
+      selectedMaDotDanhGia,
+      setLoading,
+      setError
+    );
+    setTotalWorstEvaluations(worstData.totalCount || 0);
+
+    const nguoiChuaDanhGiaData = await fetchAllNguoiChuaDanhGia(
+      selectedMaDotDanhGia,
+      setLoading,
+      setError
+    );
+    setTotalNguoiChuaDanhGia(nguoiChuaDanhGiaData.length || 0);
+  };
+
+  if (
+    loading.all ||
+    loading.latest ||
+    loading.best ||
+    loading.worst ||
+    loading.nguoiChuaDanhGia
+  ) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 py-12 px-4">
-        <Loader2 className="animate-spin h-12 w-12 text-cyan-500 mb-4" />
-        <p className="text-gray-500">Đang tải dữ liệu...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-xl p-8 flex flex-col items-center space-y-4">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-indigo-200"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-indigo-600 absolute top-0 left-0"></div>
+          </div>
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Đang tải dữ liệu
+            </h3>
+            <p className="text-gray-600">Vui lòng chờ trong giây lát...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-red-100 border border-red-200 rounded-md p-4">
-            <div className="flex items-center">
-              <AlertCircle className="h-5 w-5 mr-2 text-red-700" />
-              <h3 className="text-red-700 font-medium">Lỗi</h3>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="bg-white rounded-2xl shadow-xl p-8 border border-red-100">
+            <div className="flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mx-auto mb-4">
+              <AlertCircle className="h-8 w-8 text-red-600" />
             </div>
-            <p className="mt-2 text-sm text-red-500">{error}</p>
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Đã xảy ra lỗi
+              </h3>
+              <p className="text-gray-600 mb-6">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg hover:from-red-600 hover:to-pink-600 transition-all font-medium"
+              >
+                Thử lại
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -227,112 +340,268 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="w-full h-screen bg-gray-50">
-      <div className="w-full mx-auto px-2 sm:px-2 lg:px-2 py-2">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-800 flex items-center">
-              <Table className="h-6 w-6 mr-2 text-cyan-600" />
-              Dashboard Kết quả đánh giá
-            </h1>
-            <div className="flex items-center gap-2">
-              <select
-                value={selectedYear}
-                onChange={(e) => handleYearChange(e.target.value)}
-                className="px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 w-32"
-              >
-                <option value="">Chọn năm</option>
-                {years.map((item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={selectedMaDotDanhGia}
-                onChange={(e) => handleDotDanhGiaChange(e.target.value)}
-                disabled={!selectedYear}
-                className="px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 w-40"
-              >
-                <option value="">Tất cả đợt</option>
-                {dotDanhGiaOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+    <div className="w-full h-full min-h-screen">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-3 py-4">
+        {/* Enhanced Header */}
+        <div className="mb-8">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+            <div className="bg-gradient-to-r from-indigo-600 via-blue-500 to-cyan-600 px-6 py-6">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <BarChart3 className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold text-white">
+                      Dashboard Quản Trị
+                    </h1>
+                    <p className="text-indigo-100">
+                      Tổng quan kết quả đánh giá và thống kê
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={refreshData}
+                    className="px-4 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-all flex items-center space-x-2 border border-white/20"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                    <span className="hidden sm:inline">Làm mới</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Enhanced Filters */}
+            <div className="p-6 bg-gray-50 border-t border-gray-100">
+              <div className="flex items-center space-x-2 mb-4">
+                <Filter className="h-5 w-5 text-indigo-600" />
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Bộ lọc dữ liệu
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <Calendar className="h-4 w-4 inline mr-1" />
+                    Năm đánh giá
+                  </label>
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => handleYearChange(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all bg-white"
+                  >
+                    <option value="">Chọn năm đánh giá</option>
+                    {years.map((item) => (
+                      <option key={item.value} value={item.value}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <TrendingUp className="h-4 w-4 inline mr-1" />
+                    Đợt đánh giá
+                  </label>
+                  <select
+                    value={selectedMaDotDanhGia}
+                    onChange={(e) => handleDotDanhGiaChange(e.target.value)}
+                    disabled={!selectedYear}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="">Tất cả đợt đánh giá</option>
+                    {dotDanhGiaOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <StatsCard
-            title="Đánh giá đợt này"
-            icon={<Users className="h-6 w-6 text-cyan-600" />}
-            count={totalLatestEvaluations}
-            onClick={() =>
-              openModal("latest", setModalData, setModalTotalPages)
-            }
-            onExport={() =>
-              handleExportToExcel(
-                "latest",
-                "Danh_sach_kqdg_dot_nay",
-                selectedMaDotDanhGia || null
-              )
-            }
-            color="cyan"
-          />
-          <StatsCard
-            title="Đánh giá tốt nhất"
-            icon={<Trophy className="h-6 w-6 text-green-600" />}
-            count={totalBestEvaluations}
-            onClick={() => openModal("best", setModalData, setModalTotalPages)}
-            onExport={() =>
-              handleExportToExcel(
-                "best",
-                "Danh_sach_kqdg_tot_dot_nay",
-                selectedMaDotDanhGia || null
-              )
-            }
-            color="green"
-          />
-          <StatsCard
-            title="Đánh giá kém nhất"
-            icon={<AlertTriangle className="h-6 w-6 text-red-600" />}
-            count={totalWorstEvaluations}
-            onClick={() => openModal("worst", setModalData, setModalTotalPages)}
-            onExport={() =>
-              handleExportToExcel(
-                "worst",
-                "Danh_sach_kqdg_kem_dot_nay",
-                selectedMaDotDanhGia || null
-              )
-            }
-            color="red"
-          />
+
+        {/* Enhanced Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Latest Evaluations Card */}
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden group hover:shadow-2xl transition-all duration-300">
+            <div className="bg-gradient-to-r from-cyan-500 to-blue-500 p-4">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+                <button
+                  onClick={() =>
+                    handleExportToExcel(
+                      "latest",
+                      "Danh_sach_kqdg_dot_nay",
+                      selectedMaDotDanhGia || null
+                    )
+                  }
+                  className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+                >
+                  <Download className="h-4 w-4 text-white" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Toàn bộ kết quả đánh giá
+              </h3>
+              <p className="text-3xl font-bold text-cyan-600 mb-4">
+                {totalLatestEvaluations}
+              </p>
+              <button
+                onClick={() =>
+                  openModal("latest", setModalData, setModalTotalPages)
+                }
+                className="w-full px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg hover:from-cyan-600 hover:to-blue-600 transition-all font-medium"
+              >
+                Xem chi tiết
+              </button>
+            </div>
+          </div>
+
+          {/* Best Evaluations Card */}
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden group hover:shadow-2xl transition-all duration-300">
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-4">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                  <Trophy className="h-6 w-6 text-white" />
+                </div>
+                <button
+                  onClick={() =>
+                    handleExportToExcel(
+                      "best",
+                      "Danh_sach_kqdg_tot_dot_nay",
+                      selectedMaDotDanhGia || null
+                    )
+                  }
+                  className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+                >
+                  <Download className="h-4 w-4 text-white" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Kết Quả đánh giá tốt
+              </h3>
+              <p className="text-3xl font-bold text-green-600 mb-4">
+                {totalBestEvaluations}
+              </p>
+              <button
+                onClick={() =>
+                  openModal("best", setModalData, setModalTotalPages)
+                }
+                className="w-full px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all font-medium"
+              >
+                Xem chi tiết
+              </button>
+            </div>
+          </div>
+
+          {/* Worst Evaluations Card */}
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden group hover:shadow-2xl transition-all duration-300">
+            <div className="bg-gradient-to-r from-red-500 to-pink-500 p-4">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                  <AlertTriangle className="h-6 w-6 text-white" />
+                </div>
+                <button
+                  onClick={() =>
+                    handleExportToExcel(
+                      "worst",
+                      "Danh_sach_kqdg_kem_dot_nay",
+                      selectedMaDotDanhGia || null
+                    )
+                  }
+                  className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+                >
+                  <Download className="h-4 w-4 text-white" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Kết quả đánh giá kém
+              </h3>
+              <p className="text-3xl font-bold text-red-600 mb-4">
+                {totalWorstEvaluations}
+              </p>
+              <button
+                onClick={() =>
+                  openModal("worst", setModalData, setModalTotalPages)
+                }
+                className="w-full px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg hover:from-red-600 hover:to-pink-600 transition-all font-medium"
+              >
+                Xem chi tiết
+              </button>
+            </div>
+          </div>
+          
+          {/* People Not Evaluated Card */}
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden group hover:shadow-2xl transition-all duration-300">
+            <div className="bg-gradient-to-r from-orange-500 to-amber-500 p-4">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                  <UserX className="h-6 w-6 text-white" />
+                </div>
+                <button
+                  onClick={() =>
+                    handleExportToExcel(
+                      "nguoiChuaDanhGia",
+                      "Danh_sach_nguoi_thieu_dg",
+                      selectedMaDotDanhGia || null
+                    )
+                  }
+                  className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+                >
+                  <Download className="h-4 w-4 text-white" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Người chưa đánh giá
+              </h3>
+              <p className="text-3xl font-bold text-orange-600 mb-4">
+                {totalNguoiChuaDanhGia}
+              </p>
+              <button
+                onClick={() =>
+                  openModal(
+                    "nguoiChuaDanhGia",
+                    setModalData,
+                    setModalTotalPages
+                  )
+                }
+                className="w-full px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg hover:from-orange-600 hover:to-amber-600 transition-all font-medium"
+              >
+                Xem chi tiết
+              </button>
+            </div>
+          </div>
         </div>
-        {/* Evaluations Table */}
-        <EvaluationsTable
-          data={filteredEvaluations}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-          onSearch={handleSearch}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-        />
-        {/* Back Button */}
-        <div className="mt-6">
-          <button
-            onClick={() => navigate("/profile")}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
-          >
-            Quay lại
-          </button>
+
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 mb-8">
+          <EvaluationsTable
+            data={filteredEvaluations}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            onSearch={handleSearch}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
         </div>
       </div>
-      {/* Modal */}
+
       {showModal && (
         <EvaluationModal
           showModal={showModal}
@@ -347,7 +616,7 @@ const AdminDashboard = () => {
           onExport={() =>
             handleExportToExcel(
               showModal,
-              `Danh_sach_danh_gia_${showModal}`,
+              `Danh_sach_${showModal}`,
               selectedMaDotDanhGia || null
             )
           }

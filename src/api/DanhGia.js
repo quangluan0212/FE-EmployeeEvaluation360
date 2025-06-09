@@ -1,5 +1,126 @@
 import apiClient from "./api";
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("authToken");
+  if (!token) throw new Error("Token không tồn tại");
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+};
+
+export const getAllNguoiChuaDanhGiaPaged = async (
+  page = 1,
+  pageSize = 10,
+  search = "",
+  maDotDanhGia = null
+) => {
+  try {
+    const response = await apiClient.get(
+      "/DanhGia/admin-get-all-danh-sach-chua-danh-gia-paged",
+      {
+        headers: getAuthHeaders(),
+        params: {
+          page,
+          pageSize,
+          search,
+          maDotDanhGia,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching danh sách chưa đánh giá:", error);
+    throw error;
+  }
+};
+
+export const getAllNguoiChuaDanhGia = async (maDotDanhGia) => {
+  try {
+    const response = await apiClient.get(
+      "DanhGia/admin-get-all-danh-sach-chua-danh-gia",
+      {
+        headers: getAuthHeaders(),
+        params: {
+          maDotDanhGia,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching Ket Qua Danh Gia:", error);
+    throw error;
+  }
+};
+
+export const GetAllDanhGia = async (page = 1, pageSize = 10, search = "") => {
+  try {
+    const token = localStorage.getItem("authToken");
+    if (!token) throw console.error("Không có token !!!");
+    const response = await apiClient.get(`DanhGia/admin-get-all-danh-sach-danh-gia`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        page,
+        pageSize,
+        search,
+      },
+    });
+    if (response.code == 200) {
+      return response.data;
+    }
+  } catch (error) {
+    console.log("Có lỗi xảy ra,", error);
+    throw error;
+  }
+};
+
+export const GetAllDanhGiaCheo = async (page = 1, pageSize = 10, search = "") => {
+  try {
+    const token = localStorage.getItem("authToken");
+    if (!token) throw console.error("Không có token !!!");
+    const response = await apiClient.get(`DanhGia/admin-get-all-danh-sach-danh-gia-cheo`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        page,
+        pageSize,
+        search,
+      },
+    });
+    if (response.code == 200) {
+      return response.data;
+    }
+  } catch (error) {
+    console.log("Có lỗi xảy ra,", error);
+    throw error;
+  }
+};
+
+export const GetAllTuDanhGia = async (page = 1, pageSize = 10, search = "") => {
+  try {
+    const token = localStorage.getItem("authToken");
+    if (!token) throw console.error("Không có token !!!");
+    const response = await apiClient.get(`DanhGia/admin-get-all-danh-sach-tu-danh-gia`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        page,
+        pageSize,
+        search,
+      },
+    });
+    if (response.code == 200) {
+      return response.data;
+    }
+  } catch (error) {
+    console.log("Có lỗi xảy ra,", error);
+    throw error;
+  }
+};
+
 export const GetFormDanhGia = async (maDanhGia) => {
   try {
     const token = localStorage.getItem("authToken");
@@ -112,14 +233,11 @@ export const submitDanhGia = async (formData) => {
   try {
     const token = localStorage.getItem("authToken");
     if (!token) throw console.error("Không có token !!!");
-    const response = await apiClient.post(
-      `DanhGia/submit-danh-gia`, formData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await apiClient.post(`DanhGia/submit-danh-gia`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     if (response.code == 200) {
       return response.data;
     }

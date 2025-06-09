@@ -5,7 +5,7 @@ import {
   getBadQuaDanhGiaPaged,
 } from "./KetQuaDanhGia";
 import { GetDotDanhGiaByYear } from "./DotDanhGia";
-
+import { getAllNguoiChuaDanhGia, getAllNguoiChuaDanhGiaPaged } from "./DanhGia";
 const ITEMS_PER_PAGE = 10;
 
 export const fetchAllEvaluations = async (page, search, maDotDanhGia, setLoading, setError) => {
@@ -115,5 +115,48 @@ export const fetchDotDanhGia = async (year, setError) => {
     console.error("Lỗi khi tải danh sách đợt đánh giá:", err);
     setError("Không thể tải danh sách đợt đánh giá.");
     return [];
+  }
+};
+
+export const fetchAllNguoiChuaDanhGia = async (maDotDanhGia, setLoading, setError) => {
+  try {
+    setLoading((prev) => ({ ...prev, nguoiChuaDanhGia: true }));
+    const response = await getAllNguoiChuaDanhGia(maDotDanhGia);
+    if (response && Array.isArray(response)) {
+      return response;
+    } else {
+      console.warn("Không có dữ liệu người chưa đánh giá:", response);
+      return [];
+    }
+  } catch (err) {
+    console.error("Lỗi khi tải danh sách người chưa đánh giá:", err);
+    setError(err.message || "Lỗi khi tải danh sách người chưa đánh giá.");
+    return [];
+  } finally {
+    setLoading((prev) => ({ ...prev, nguoiChuaDanhGia: false }));
+  }
+};
+
+export const fetchAllNguoiChuaDanhGiaPaged = async (page, search, maDotDanhGia, setLoading, setError) => {
+  try {
+    setLoading((prev) => ({ ...prev, nguoiChuaDanhGiaPaged: true }));
+    const response = await getAllNguoiChuaDanhGiaPaged(page, ITEMS_PER_PAGE, search, maDotDanhGia);
+    if (response && Array.isArray(response.data.items)) {
+      return {
+        items: response.data.items,
+        currentPage: response.currentPage || 1,
+        totalPages: response.totalPages || 1,
+        totalCount: response.totalCount || 0,
+      };
+    } else {
+      console.warn("Không có dữ liệu người chưa đánh giá phân trang:", response);
+      return { items: [], currentPage: 1, totalPages: 1, totalCount: 0 };
+    }
+  } catch (err) {
+    console.error("Lỗi khi tải danh sách người chưa đánh giá phân trang:", err);
+    setError(err.message || "Lỗi khi tải danh sách người chưa đánh giá phân trang.");
+    return { items: [], currentPage: 1, totalPages: 1, totalCount: 0 };
+  } finally {
+    setLoading((prev) => ({ ...prev, nguoiChuaDanhGiaPaged: false }));
   }
 };

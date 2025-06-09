@@ -19,6 +19,7 @@ import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import GroupMembersPage from "../pages/GroupMembersPage";
 import AdminDashboard from "../pages/AdminDashboard";
 import NotFound from "../pages/NotFound";
+import AdminDetailsEvaluation from "../pages/AdminDetailsEvaluation";
 
 const AppRoutes = () => {
   return (
@@ -79,8 +80,16 @@ const AppRoutes = () => {
               </PrivateRoute>
             }
           />
-
           <Route
+            path="/admin-details-evaluation"
+            element={
+              <PrivateRoute role="Admin">
+                <AdminDetailsEvaluation />
+              </PrivateRoute>
+            }
+          />
+          <Route
+
             path="/admin-evaluations"
             element={
               <PrivateRoute role="Admin">
