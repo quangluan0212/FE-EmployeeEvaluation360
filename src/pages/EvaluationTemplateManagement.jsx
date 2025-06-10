@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import {
   GetAllMauDanhGiaPagedAsync,
@@ -20,6 +18,7 @@ import {
   CheckCircle,
   AlertCircle,
 } from "lucide-react";
+import { showSuccess, showError, showConfirm } from "../utils/notifications";
 
 const EvaluationTemplateManagement = () => {
   const [templates, setTemplates] = useState([]);
@@ -37,7 +36,7 @@ const EvaluationTemplateManagement = () => {
     danhSachCauHoi: [{ noiDung: "", diemToiDa: 0 }],
   });
 
-    const getStatusBadge = (status) => {
+  const getStatusBadge = (status) => {
     switch (status) {
       case "Active":
         return (
@@ -84,11 +83,13 @@ const EvaluationTemplateManagement = () => {
           setTotalPages(response.totalPages);
         } else {
           console.error("Unexpected response format:", response);
+          showError("Lỗi", "Dữ liệu mẫu đánh giá không đúng định dạng!");
           setTemplates([]);
           setTotalPages(1);
         }
       } catch (error) {
         console.error("Error fetching templates:", error);
+        showError("Lỗi", "Không thể tải danh sách mẫu đánh giá. Vui lòng thử lại!");
         setTemplates([]);
         setTotalPages(1);
       } finally {
@@ -125,20 +126,25 @@ const EvaluationTemplateManagement = () => {
   };
 
   const handleDeleteTemplate = async (maMauDanhGia) => {
-    const confirmed = window.confirm(
-      "Bạn có chắc chắn muốn xóa mẫu đánh giá này?"
+    const result = await showConfirm(
+      "Xác nhận xóa",
+      "Bạn có chắc chắn muốn xóa mẫu đánh giá này? Hành động này không thể hoàn tác.",
+      "Xóa",
+      "Hủy",
+      { confirmButtonColor: "#dc2626" }
     );
-    if (!confirmed) return;
+
+    if (!result.isConfirmed) return;
 
     try {
       await deleteMauDanhGia(maMauDanhGia);
-      alert("Xóa mẫu đánh giá thành công!");
+      showSuccess("Thành công", "Xóa mẫu đánh giá thành công!");
       setTemplates((prev) =>
         prev.filter((t) => t.maMauDanhGia !== maMauDanhGia)
       );
     } catch (error) {
       console.error("Error deleting template:", error);
-      alert("Xóa mẫu đánh giá thất bại. Vui lòng thử lại!");
+      showError("Lỗi", "Xóa mẫu đánh giá thất bại. Vui lòng thử lại!");
     }
   };
 
@@ -231,16 +237,21 @@ const EvaluationTemplateManagement = () => {
       };
 
       if (currentTemplate.maMauDanhGia) {
-        const confirmed = window.confirm(
-          "Bạn có chắc chắn muốn cập nhật mẫu đánh giá này?"
+        const result = await showConfirm(
+          "Xác nhận cập nhật",
+          "Bạn có chắc chắn muốn cập nhật mẫu đánh giá này?",
+          "Cập nhật",
+          "Hủy",
+          { confirmButtonColor: "#7c3aed" }
         );
-        if (!confirmed) return;
+
+        if (!result.isConfirmed) return;
 
         const updatedTemplate = await updateMauDanhGia(
           currentTemplate.maMauDanhGia,
           templateData
         );
-        alert("Cập nhật mẫu đánh giá thành công!");
+        showSuccess("Thành công", "Cập nhật mẫu đánh giá thành công!");
         setTemplates((prev) =>
           prev.map((t) =>
             t.maMauDanhGia === updatedTemplate.maMauDanhGia
@@ -250,20 +261,20 @@ const EvaluationTemplateManagement = () => {
         );
       } else {
         const newTemplate = await addMauDanhGia(templateData);
-        alert("Thêm mẫu đánh giá thành công!");
+        showSuccess("Thành công", "Thêm mẫu đánh giá thành công!");
         const response = await GetAllMauDanhGiaPagedAsync(
           currentPage,
           10,
           searchTerm
         );
         setTemplates(response.items || []);
-        setTotalPages(response.totalPages || 1) - OK;
+        setTotalPages(response.totalPages || 1);
       }
 
       setShowModal(false);
     } catch (error) {
       console.error("Error saving template:", error);
-      alert("Lưu mẫu đánh giá thất bại. Vui lòng thử lại!");
+      showError("Lỗi", "Lưu mẫu đánh giá thất bại. Vui lòng thử lại!");
     }
   };
 
@@ -319,7 +330,6 @@ const EvaluationTemplateManagement = () => {
         </div>
       </div>
 
-      {/* Templates Table */}
       <div className="overflow-x-auto bg-white rounded-xl shadow-md">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -334,7 +344,7 @@ const EvaluationTemplateManagement = () => {
                 Loại đánh giá
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Trạnh thái
+                Trạng thái
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Hành động
@@ -404,7 +414,6 @@ const EvaluationTemplateManagement = () => {
         </table>
       </div>
 
-      {/* Pagination */}
       <div className="flex justify-between items-center mt-6 bg-white p-4 rounded-xl shadow-md">
         <button
           onClick={() => handlePageChange(currentPage - 1)}
@@ -440,7 +449,6 @@ const EvaluationTemplateManagement = () => {
         </button>
       </div>
 
-      {/* Modal for adding/editing template */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-2xl transform transition-all animate-fade-in-up max-h-[90vh] overflow-y-auto">

@@ -24,6 +24,7 @@ import {
   GetAllMauDanhGiaActive,
   GetAllMauDanhGiaByMDDG,
 } from "../api/MauDanhGia";
+import { showSuccess, showError, showConfirm } from "../utils/notifications";
 
 const EvaluationPeriodManagement = () => {
   const [evaluationPeriods, setEvaluationPeriods] = useState([]);
@@ -75,6 +76,7 @@ const EvaluationPeriodManagement = () => {
       setCurrentPeriod(activePeriod || null);
     } catch (error) {
       console.error("Error fetching evaluation periods:", error);
+      showError("Lỗi", "Không thể tải danh sách đợt đánh giá. Vui lòng thử lại!");
     } finally {
       setIsLoading(false);
     }
@@ -88,6 +90,7 @@ const EvaluationPeriodManagement = () => {
       }
     } catch (error) {
       console.error("Error fetching evaluation templates:", error);
+      showError("Lỗi", "Không thể tải danh sách mẫu đánh giá. Vui lòng thử lại!");
     }
   };
 
@@ -109,7 +112,6 @@ const EvaluationPeriodManagement = () => {
       const templatesForPeriod = await GetAllMauDanhGiaByMDDG(period.maDotDanhGia);
       const selectedTemplateIds = templatesForPeriod.map((template) => template.maMauDanhGia);
 
-      // Kiểm tra xem các maMauDanhGia có tồn tại trong evaluationTemplates
       const validTemplateIds = selectedTemplateIds.filter((id) =>
         evaluationTemplates.some((template) => template.maMauDanhGia === id)
       );
@@ -127,7 +129,7 @@ const EvaluationPeriodManagement = () => {
       setShowEditModal(true);
     } catch (error) {
       console.error("Error fetching evaluation period templates:", error);
-      alert("Có lỗi xảy ra khi tải mẫu đánh giá của đợt đánh giá này!");
+      showError("Lỗi", "Không thể tải mẫu đánh giá của đợt đánh giá này!");
     } finally {
       setIsLoading(false);
     }
@@ -143,13 +145,13 @@ const EvaluationPeriodManagement = () => {
 
     try {
       await EndDotDanhGia(periodToEnd);
-      alert("Kết thúc đợt đánh giá thành công!");
+      showSuccess("Thành công", "Kết thúc đợt đánh giá thành công!");
       setShowEndModal(false);
       setPeriodToEnd(null);
       fetchEvaluationPeriods();
     } catch (error) {
       console.error("Error ending evaluation period:", error);
-      alert("Có lỗi xảy ra khi kết thúc đợt đánh giá!");
+      showError("Lỗi", "Không thể kết thúc đợt đánh giá. Vui lòng thử lại!");
       setShowEndModal(false);
     }
   };
@@ -254,12 +256,12 @@ const EvaluationPeriodManagement = () => {
         ngayKetThuc: formData.ngayKetThuc,
         mauDanhGias: selectedTemplates,
       });
-      alert("Tạo đợt đánh giá thành công!");
+      showSuccess("Thành công", "Tạo đợt đánh giá thành công!");
       setShowCreateModal(false);
       fetchEvaluationPeriods();
     } catch (error) {
       console.error("Error creating evaluation period:", error);
-      alert("Có lỗi xảy ra khi tạo đợt đánh giá!");
+      showError("Lỗi", "Không thể tạo đợt đánh giá. Vui lòng thử lại!");
     }
   };
 
@@ -280,12 +282,12 @@ const EvaluationPeriodManagement = () => {
       };
 
       await UpdateDotDanhGia(updateData);
-      alert("Cập nhật đợt đánh giá thành công!");
+      showSuccess("Thành công", "Cập nhật đợt đánh giá thành công!");
       setShowEditModal(false);
       fetchEvaluationPeriods();
     } catch (error) {
       console.error("Error updating evaluation period:", error);
-      alert("Có lỗi xảy ra khi cập nhật đợt đánh giá!");
+      showError("Lỗi", "Không thể cập nhật đợt đánh giá. Vui lòng thử lại!");
     }
   };
 
@@ -339,7 +341,7 @@ const EvaluationPeriodManagement = () => {
   }, {});
 
   return (
-    <div className="container mx-auto p-6 bg-gradient-to-br from-white to-gray-50 shadow-xl rounded-xl min-h-screen">
+    <div className="container mx-auto p-6 bg-gradient-to-br from-white to-gray-50 shadow-xl rounded-xl min-h-screen py-2 px-2">
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div className="flex items-center">
           <Calendar className="h-7 w-7 text-purple-600 mr-3" />
@@ -498,7 +500,6 @@ const EvaluationPeriodManagement = () => {
         </div>
       </div>
 
-      {/* Create Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-2xl transform transition-all max-h-[90vh] overflow-y-auto">
@@ -615,8 +616,7 @@ const EvaluationPeriodManagement = () => {
                     <p className="text-sm text-purple-700 flex items-start">
                       <Info className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
                       <span>
-                        Bạn cần chọn đúng 1 mẫu đánh giá cho mỗi loại: LEADER,
-                        TEAM, ADMIN-LEADER, NHANVIEN, NHANVIEN-LEADER
+                        Bạn cần chọn đúng 1 mẫu đánh giá cho mỗi loại
                       </span>
                     </p>
                   </div>
@@ -698,7 +698,6 @@ const EvaluationPeriodManagement = () => {
         </div>
       )}
 
-      {/* Edit Modal */}
       {showEditModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-2xl transform transition-all max-h-[90vh] overflow-y-auto">
@@ -821,8 +820,7 @@ const EvaluationPeriodManagement = () => {
                       <p className="text-sm text-purple-700 flex items-start">
                         <Info className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
                         <span>
-                          Bạn cần chọn đúng 1 mẫu đánh giá cho mỗi loại: LEADER,
-                          TEAM, ADMIN-LEADER, NHANVIEN, NHANVIEN-LEADER
+                          Bạn cần chọn đúng 1 mẫu đánh giá cho mỗi loại
                         </span>
                       </p>
                     </div>
@@ -905,7 +903,6 @@ const EvaluationPeriodManagement = () => {
         </div>
       )}
 
-      {/* End Period Modal */}
       {showEndModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full">
@@ -924,7 +921,18 @@ const EvaluationPeriodManagement = () => {
                 Hủy
               </button>
               <button
-                onClick={confirmEndPeriod}
+                onClick={async () => {
+                  const result = await showConfirm(
+                    "Xác nhận kết thúc",
+                    "Bạn có chắc chắn muốn kết thúc đợt đánh giá này? Hành động này không thể hoàn tác.",
+                    "Kết thúc",
+                    "Hủy",
+                    { confirmButtonColor: "#dc2626" }
+                  );
+                  if (result.isConfirmed) {
+                    await confirmEndPeriod();
+                  }
+                }}
                 className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200 flex items-center"
               >
                 <StopCircle className="h-4 w-4 mr-2" />

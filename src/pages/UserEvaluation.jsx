@@ -6,7 +6,22 @@ import {
   GetDanhGiaById,
   UserGetListDanhGia,
 } from "../api/DanhGia";
-import { ClipboardList, Edit, Eye, X, CheckCircle, AlertCircle, Calendar, Loader2, Save, Users, User, ChevronDown, ChevronUp, UserCheck } from 'lucide-react';
+import {
+  ClipboardList,
+  Edit,
+  Eye,
+  X,
+  CheckCircle,
+  AlertCircle,
+  Calendar,
+  Loader2,
+  Save,
+  Users,
+  User,
+  ChevronDown,
+  ChevronUp,
+  UserCheck,
+} from "lucide-react";
 
 const UserEvaluation = () => {
   const [groupsData, setGroupsData] = useState([]);
@@ -21,7 +36,7 @@ const UserEvaluation = () => {
   const [viewMode, setViewMode] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState({});
   const maNguoiDung = localStorage.getItem("userId");
-  
+
   // Format date to display
   const formatDate = (dateString) => {
     const options = {
@@ -320,7 +335,7 @@ const UserEvaluation = () => {
   }
 
   return (
-    <div className="w-full min-h-screen relative">
+    <div className="w-full min-h-screen relative py-2 px-2">
       {/* Evaluation Form Modal */}
       {showEvaluationForm && evaluationData && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-start p-0 sm:p-4">
@@ -376,18 +391,22 @@ const UserEvaluation = () => {
 
             <div className="px-6 py-4">
               {!viewMode && (
-                <div className={`mb-6 p-4 rounded-md border ${
-                  isSelfEvaluation(selectedEvaluation) 
-                    ? "bg-purple-50 border-purple-100" 
-                    : "bg-cyan-50 border-cyan-100"
-                }`}>
-                  <p className={`text-sm ${
-                    isSelfEvaluation(selectedEvaluation) 
-                      ? "text-purple-700" 
-                      : "text-cyan-700"
-                  }`}>
+                <div
+                  className={`mb-6 p-4 rounded-md border ${
+                    isSelfEvaluation(selectedEvaluation)
+                      ? "bg-purple-50 border-purple-100"
+                      : "bg-cyan-50 border-cyan-100"
+                  }`}
+                >
+                  <p
+                    className={`text-sm ${
+                      isSelfEvaluation(selectedEvaluation)
+                        ? "text-purple-700"
+                        : "text-cyan-700"
+                    }`}
+                  >
                     <span className="font-medium">
-                      {isSelfEvaluation(selectedEvaluation) 
+                      {isSelfEvaluation(selectedEvaluation)
                         ? "Đây là phần tự đánh giá. Hãy đánh giá bản thân một cách khách quan và trung thực để giúp cải thiện năng lực của chính mình."
                         : "Xin các anh/chị hãy đánh giá đồng nghiệp một cách chân thành và khách quan — những góp ý xây dựng của anh/chị sẽ là động lực quý giá giúp công ty ngày càng vững mạnh và phát triển !!!"}
                     </span>
@@ -475,10 +494,10 @@ const UserEvaluation = () => {
                       ? "bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600"
                       : "bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600"
                   } focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                    isSelfEvaluation(selectedEvaluation) ? "focus:ring-purple-500" : "focus:ring-cyan-500"
-                  } ${
-                    submitting ? "opacity-70 cursor-not-allowed" : ""
-                  }`}
+                    isSelfEvaluation(selectedEvaluation)
+                      ? "focus:ring-purple-500"
+                      : "focus:ring-cyan-500"
+                  } ${submitting ? "opacity-70 cursor-not-allowed" : ""}`}
                   disabled={submitting}
                 >
                   {submitting ? (
@@ -675,7 +694,9 @@ const UserEvaluation = () => {
                                             ? "bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600"
                                             : "bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600"
                                         } focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                                          isSelf ? "focus:ring-purple-500" : "focus:ring-cyan-500"
+                                          isSelf
+                                            ? "focus:ring-purple-500"
+                                            : "focus:ring-cyan-500"
                                         } ${
                                           submitting
                                             ? "opacity-50 cursor-not-allowed"
@@ -698,7 +719,9 @@ const UserEvaluation = () => {
                                               ? "text-purple-700 bg-purple-50 hover:bg-purple-100"
                                               : "text-amber-700 bg-amber-50 hover:bg-amber-100"
                                           } focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                                            isSelf ? "focus:ring-purple-500" : "focus:ring-amber-500"
+                                            isSelf
+                                              ? "focus:ring-purple-500"
+                                              : "focus:ring-amber-500"
                                           }`}
                                         >
                                           <Edit className="h-4 w-4 mr-1.5" />
@@ -715,7 +738,9 @@ const UserEvaluation = () => {
                                               ? "text-purple-700 bg-purple-50 hover:bg-purple-100"
                                               : "text-cyan-700 bg-cyan-50 hover:bg-cyan-100"
                                           } focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                                            isSelf ? "focus:ring-purple-500" : "focus:ring-cyan-500"
+                                            isSelf
+                                              ? "focus:ring-purple-500"
+                                              : "focus:ring-cyan-500"
                                           }`}
                                         >
                                           <Eye className="h-4 w-4 mr-1.5" />

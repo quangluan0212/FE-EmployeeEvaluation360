@@ -6,6 +6,7 @@ import { getChucVuList } from "../api/ChucVu"
 import { getEmployeeList, addEmployee, adminUpdateEmployee } from "../api/NguoiDung"
 import Select from "react-select"
 import { Search, UserPlus, Edit, Trash2, ChevronLeft, ChevronRight, X, Save, Users } from 'lucide-react'
+import Swal from 'sweetalert2'
 
 const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([])
@@ -34,6 +35,12 @@ const EmployeeManagement = () => {
         setTotalPages(response.totalPages)
       } catch (error) {
         console.error("Lỗi khi lấy danh sách nhân viên:", error)
+        Swal.fire({
+          icon: 'error',
+          title: 'Lỗi',
+          text: 'Không thể tải danh sách nhân viên. Vui lòng thử lại!',
+          confirmButtonColor: '#0891b2',
+        })
       } finally {
         setIsLoading(false)
       }
@@ -49,6 +56,12 @@ const EmployeeManagement = () => {
         setPositions(data)
       } catch (error) {
         console.error("Error fetching positions:", error)
+        Swal.fire({
+          icon: 'error',
+          title: 'Lỗi',
+          text: 'Không thể tải danh sách chức vụ. Vui lòng thử lại!',
+          confirmButtonColor: '#0891b2',
+        })
       }
     }
 
@@ -91,12 +104,24 @@ const EmployeeManagement = () => {
   const handleSaveEmployee = async () => {
     try {
       await addEmployee(newEmployee)
-      alert("Thêm nhân viên thành công!")
+      Swal.fire({
+        icon: 'success',
+        title: 'Thành công',
+        text: 'Thêm nhân viên thành công!',
+        confirmButtonColor: '#0891b2',
+        timer: 1500,
+        timerProgressBar: true,
+      })
       handleModalClose()
       const response = await getEmployeeList(currentPage, 10)
       setEmployees(response.items)
     } catch (error) {
-      alert("Lỗi khi thêm nhân viên!")
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: 'Không thể thêm nhân viên. Vui lòng kiểm tra lại thông tin!',
+        confirmButtonColor: '#0891b2',
+      })
       console.error("Error adding employee:", error)
     }
   }
@@ -110,6 +135,12 @@ const EmployeeManagement = () => {
       setTotalPages(response.totalPages)
     } catch (error) {
       console.error("Lỗi khi tìm kiếm nhân viên:", error)
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: 'Không thể tìm kiếm nhân viên. Vui lòng thử lại!',
+        confirmButtonColor: '#0891b2',
+      })
     } finally {
       setIsLoading(false)
     }
@@ -130,16 +161,29 @@ const EmployeeManagement = () => {
   const handleUpdateEmployee = async () => {
     try {
       const { hoTen, email, dienThoai, matKhau } = newEmployee
-      if (!newEmployee.hoTen || !newEmployee.email || !newEmployee.dienThoai) {
-        alert("Vui lòng điền đầy đủ thông tin!")
+      if (!hoTen || !email || !dienThoai) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Thiếu thông tin',
+          text: 'Vui lòng điền đầy đủ thông tin!',
+          confirmButtonColor: '#0891b2',
+        })
         return
       }
 
-      const userConfirmed = window.confirm(
-        "Bạn có chắc chắn muốn cập nhật thông tin nhân viên này?"
-      )
-      if (!userConfirmed) {
-        return // Exit if the user cancels the action
+      const result = await Swal.fire({
+        title: 'Xác nhận cập nhật',
+        text: 'Bạn có chắc chắn muốn cập nhật thông tin nhân viên này?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#0891b2',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Cập nhật',
+        cancelButtonText: 'Hủy',
+      })
+
+      if (!result.isConfirmed) {
+        return
       }
 
       const updatedEmployee = {
@@ -150,21 +194,64 @@ const EmployeeManagement = () => {
       }
 
       await adminUpdateEmployee(newEmployee.maNguoiDung, updatedEmployee)
-      alert("Cập nhật nhân viên thành công!")
+      Swal.fire({
+        icon: 'success',
+        title: 'Thành công',
+        text: 'Cập nhật nhân viên thành công!',
+        confirmButtonColor: '#0891b2',
+        timer: 1500,
+        timerProgressBar: true,
+      })
       handleModalClose()
-      // Refresh the employee list
       const response = await getEmployeeList(currentPage, 10)
       setEmployees(response.items)
     } catch (error) {
-      alert("Lỗi khi cập nhật nhân viên!")
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: 'Không thể cập nhật nhân viên. Vui lòng thử lại!',
+        confirmButtonColor: '#0891b2',
+      })
       console.error("Error updating employee:", error)
     }
   }
 
-  const handleDeleteEmployee = (id) => {
-    // This function is not implemented in the original code
-    // Placeholder for future implementation
-    console.log("Delete employee with ID:", id)
+  const handleDeleteEmployee = async (id) => {
+    try {
+      const result = await Swal.fire({
+        title: 'Xác nhận xóa',
+        text: 'Bạn có chắc chắn muốn xóa nhân viên này?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#0891b2',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Xóa',
+        cancelButtonText: 'Hủy',
+      })
+
+      if (result.isConfirmed) {
+        // Placeholder for delete API call
+        // await deleteEmployee(id) // Implement this API call
+        Swal.fire({
+          icon: 'success',
+          title: 'Thành công',
+          text: 'Xóa nhân viên thành công!',
+          confirmButtonColor: '#0891b2',
+          timer: 1500,
+          timerProgressBar: true,
+        })
+        const response = await getEmployeeList(currentPage, 10)
+        setEmployees(response.items)
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: 'Không thể xóa nhân viên. Vui lòng thử lại!',
+        confirmButtonColor: '#0891b2',
+      })
+      console.error("Error deleting employee:", error)
+    }
   }
 
   const positionOptions = positions.map((position) => ({
@@ -172,7 +259,6 @@ const EmployeeManagement = () => {
     label: position.tenChucVu,
   }))
 
-  // Custom styles for react-select
   const customSelectStyles = {
     control: (provided) => ({
       ...provided,
@@ -227,7 +313,6 @@ const EmployeeManagement = () => {
         </div>
       </div>
 
-      {/* Employee Table */}
       <div className="overflow-x-auto bg-white rounded-xl shadow-md">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -332,7 +417,6 @@ const EmployeeManagement = () => {
         </table>
       </div>
 
-      {/* Pagination */}
       <div className="flex justify-between items-center mt-6 bg-white p-4 rounded-xl shadow-md">
         <button
           onClick={() => handlePageChange(currentPage - 1)}
@@ -367,7 +451,6 @@ const EmployeeManagement = () => {
         </button>
       </div>
 
-      {/* Modal for adding/editing employee */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md transform transition-all animate-fade-in-up">

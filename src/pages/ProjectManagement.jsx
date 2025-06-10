@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import { getProjectList, addProject, updateProject, deleteProject } from "../api/DuAn"
 import {
@@ -15,6 +13,7 @@ import {
   CheckCircle,
   Clock,
 } from "lucide-react"
+import { showSuccess, showError, showConfirm } from "../utils/notifications"
 
 const ProjectManagement = () => {
   const [projects, setProjects] = useState([])
@@ -25,7 +24,7 @@ const ProjectManagement = () => {
     maDuAn: "",
     tenDuAn: "",
     moTa: "",
-    trangThai: "Bắt đầu",
+    trangThai: "Active",
   })
   const [searchTerm, setSearchTerm] = useState("")
   const [isLoading, setIsLoading] = useState(true)
@@ -45,11 +44,13 @@ const ProjectManagement = () => {
           console.error("Unexpected response format:", response)
           setProjects([])
           setTotalPages(1)
+          showError("Lỗi", "Dữ liệu dự án không đúng định dạng!")
         }
       } catch (error) {
         console.error("Error fetching projects:", error)
         setProjects([])
         setTotalPages(1)
+        showError("Lỗi", "Không thể tải danh sách dự án. Vui lòng thử lại!")
       } finally {
         setIsLoading(false)
       }
@@ -63,7 +64,7 @@ const ProjectManagement = () => {
       maDuAn: "",
       tenDuAn: "",
       moTa: "",
-      trangThai: "Bắt đầu",
+      trangThai: "Active",
     })
     setShowModal(true)
   }
@@ -74,16 +75,23 @@ const ProjectManagement = () => {
   }
 
   const handleDeleteProject = async (maDuAn) => {
-    const userConfirmed = window.confirm("Bạn có chắc chắn muốn xóa dự án này?")
-    if (!userConfirmed) return
+    const result = await showConfirm(
+      "Xác nhận xóa",
+      "Bạn có chắc chắn muốn xóa dự án này? Hành động này không thể hoàn tác.",
+      "Xóa",
+      "Hủy",
+      { confirmButtonColor: "#dc2626" }
+    )
+
+    if (!result.isConfirmed) return
 
     try {
       await deleteProject(maDuAn)
-      alert("Xóa dự án thành công!")
+      showSuccess("Thành công", "Xóa dự án thành công!")
       setProjects((prevProjects) => prevProjects.filter((p) => p.maDuAn !== maDuAn))
     } catch (error) {
       console.error("Lỗi khi xóa dự án:", error)
-      alert("Xóa dự án thất bại. Vui lòng thử lại!")
+      showError("Lỗi", "Xóa dự án thất bại. Vui lòng thử lại!")
     }
   }
 
@@ -102,37 +110,42 @@ const ProjectManagement = () => {
   }
 
   const handleSaveProject = async () => {
-    try {
-      if (!currentProject.tenDuAn || !currentProject.moTa) {
-        alert("Tên dự án và mô tả không được để trống!")
-        return
-      }
+    if (!currentProject.tenDuAn || !currentProject.moTa) {
+      showError("Lỗi", "Tên dự án và mô tả không được để trống!")
+      return
+    }
 
+    try {
       if (currentProject.maDuAn) {
-        // Cập nhật dự án
-        const confirmed = window.confirm("Bạn có chắc chắn muốn cập nhật dự án này?")
-        if (!confirmed) return
+        const result = await showConfirm(
+          "Xác nhận cập nhật",
+          "Bạn có chắc chắn muốn cập nhật dự án này?",
+          "Cập nhật",
+          "Hủy",
+          { confirmButtonColor: "#7c3aed" }
+        )
+
+        if (!result.isConfirmed) return
 
         const updatedProject = await updateProject(currentProject.maDuAn, {
           tenDuAn: currentProject.tenDuAn,
           moTa: currentProject.moTa,
-          trangThai: currentProject.trangThai, // Trạng thái có thể thay đổi khi cập nhật
+          trangThai: currentProject.trangThai,
         })
 
-        alert("Cập nhật dự án thành công!")
+        showSuccess("Thành công", "Cập nhật dự án thành công!")
         setProjects((prev) => prev.map((p) => (p.maDuAn === updatedProject.maDuAn ? updatedProject : p)))
       } else {
-        // Thêm dự án mới
         console.log("Sending project data:", {
           tenDuAn: currentProject.tenDuAn,
           moTa: currentProject.moTa,
         })
-        const newProject = await addProject({
+        await addProject({
           tenDuAn: currentProject.tenDuAn,
           moTa: currentProject.moTa,
         })
 
-        alert("Thêm dự án thành công!")
+        showSuccess("Thành công", "Thêm dự án thành công!")
         const response = await getProjectList(currentPage, 10, searchTerm)
         setProjects(response.items || [])
         setTotalPages(response.totalPages || 1)
@@ -141,7 +154,7 @@ const ProjectManagement = () => {
       setShowModal(false)
     } catch (error) {
       console.error("Lỗi khi lưu dự án:", error)
-      alert("Lưu dự án thất bại. Vui lòng thử lại!")
+      showError("Lỗi", "Lưu dự án thất bại. Vui lòng thử lại!")
     }
   }
 
@@ -151,14 +164,14 @@ const ProjectManagement = () => {
         return (
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-blue-800">
             <Clock className="w-3 h-3 mr-1" />
-            {status}
+            Active
           </span>
         )
       case "Ended":
         return (
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
             <CheckCircle className="w-3 h-3 mr-1" />
-            {status}
+            Ended
           </span>
         )
       default:
@@ -201,7 +214,7 @@ const ProjectManagement = () => {
 
           <button
             onClick={handleAddProject}
-            className="w-full md:w-auto px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 flex items-center justify-center"
+            className="w-full md:w-auto px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50 flex items-center justify-center"
           >
             <PlusCircle className="h-5 w-5 mr-2" />
             Thêm dự án
@@ -209,7 +222,6 @@ const ProjectManagement = () => {
         </div>
       </div>
 
-      {/* Project Table */}
       <div className="overflow-x-auto bg-white rounded-xl shadow-md">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -279,7 +291,6 @@ const ProjectManagement = () => {
         </table>
       </div>
 
-      {/* Pagination */}
       <div className="flex justify-between items-center mt-6 bg-white p-4 rounded-xl shadow-md">
         <button
           onClick={() => handlePageChange(currentPage - 1)}
@@ -314,7 +325,6 @@ const ProjectManagement = () => {
         </button>
       </div>
 
-      {/* Modal for adding/editing project */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md transform transition-all animate-fade-in-up">
@@ -365,7 +375,6 @@ const ProjectManagement = () => {
                 />
               </div>
 
-              {/* Chỉ hiển thị trường trạng thái khi cập nhật */}
               {currentProject.maDuAn && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
@@ -395,7 +404,7 @@ const ProjectManagement = () => {
               </button>
               <button
                 onClick={handleSaveProject}
-                className="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-lg hover:from-emerald-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 flex items-center"
+                className="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-lg hover:from-emerald-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50 flex items-center"
               >
                 <Save className="h-4 w-4 mr-2" />
                 {currentProject.maDuAn ? "Cập nhật" : "Lưu"}

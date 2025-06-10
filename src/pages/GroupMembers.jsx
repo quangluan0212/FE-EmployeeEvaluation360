@@ -6,6 +6,7 @@ import {
   getDanhSachNguoiDungKhongCoTrongNhom,
   addThanhVienVaoNhom,
 } from "../api/Nhom";
+import { showSuccess, showError, showConfirm } from "../utils/notifications";
 
 const GroupMembers = () => {
   const { maNhom } = useParams();
@@ -32,11 +33,17 @@ const GroupMembers = () => {
           membersPageSize,
           searchTerm
         );
-        setMembers(response.items || []);
+        const items = response.items || [];
+        items.forEach((item, index) => {
+          if (!item.id) {
+            console.warn(`Member at index ${index} missing id:`, item);
+          }
+        });
+        setMembers(items);
         setTotalMembersPages(response.totalPages || 1);
       } catch (error) {
         console.error("Lỗi khi lấy danh sách thành viên:", error);
-        window.alert("Lỗi khi lấy danh sách thành viên!");
+        showError("Lỗi", "Lỗi khi lấy danh sách thành viên!");
       } finally {
         setLoading(false);
       }
@@ -50,10 +57,16 @@ const GroupMembers = () => {
     try {
       setLoading(true);
       const response = await getDanhSachNguoiDungKhongCoTrongNhom(maNhom);
-      setAvailableUsers(response.data || []);
+      const data = response.data || [];
+      data.forEach((item, index) => {
+        if (!item.maNguoiDung) {
+          console.warn(`User at index ${index} missing maNguoiDung:`, item);
+        }
+      });
+      setAvailableUsers(data);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách người dùng:", error);
-      window.alert("Lỗi khi lấy danh sách người dùng!");
+      showError("Lỗi", "Lỗi khi lấy danh sách người dùng!");
     } finally {
       setLoading(false);
     }
@@ -78,7 +91,7 @@ const GroupMembers = () => {
   // Xử lý thêm thành viên
   const handleConfirmAdd = async () => {
     if (selectedUsers.length === 0) {
-      window.alert("Vui lòng chọn ít nhất một người dùng!");
+      showError("Lỗi", "Vui lòng chọn ít nhất một người dùng!");
       return;
     }
 
@@ -90,9 +103,8 @@ const GroupMembers = () => {
     try {
       setLoading(true);
       await addThanhVienVaoNhom(data);
-      window.alert("Thêm thành viên thành công!");
+      showSuccess("Thành công", "Thêm thành viên thành công!");
       setShowAddModal(false);
-      // Cập nhật lại danh sách thành viên
       const response = await getDanhSachThanhVienNhom(
         maNhom,
         membersPage,
@@ -103,41 +115,35 @@ const GroupMembers = () => {
       setTotalMembersPages(response.totalPages || 1);
     } catch (error) {
       console.error("Lỗi khi thêm thành viên:", error);
-      window.alert("Lỗi khi thêm thành viên!");
+      showError("Lỗi", "Lỗi khi thêm thành viên!");
     } finally {
       setLoading(false);
     }
   };
 
   // Xử lý xóa thành viên
-  const handleDeleteMember = (id) => {
-    setMemberToDelete(id);
-    setShowModal(true);
-  };
+  const handleDeleteMember = async (id, hoTen) => {
+    const result = await showConfirm(
+      "Xác nhận xóa",
+      `Bạn có chắc chắn muốn xóa ${hoTen} khỏi nhóm? Hành động này không thể hoàn tác.`,
+      "Xóa",
+      "Hủy",
+      { confirmButtonColor: "#dc2626" }
+    );
 
-  const confirmDelete = async () => {
-    if (!memberToDelete) return;
+    if (!result.isConfirmed) return;
 
     try {
       setLoading(true);
-      await deleteThanhVien(memberToDelete);
-      setMembers((prev) =>
-        prev.filter((member) => member.id !== memberToDelete)
-      );
-      window.alert("Xóa thành viên thành công!");
-      setShowModal(false);
-      setMemberToDelete(null);
+      await deleteThanhVien(id);
+      setMembers((prev) => prev.filter((member) => member.id !== id));
+      showSuccess("Thành công", "Xóa thành viên thành công!");
     } catch (error) {
       console.error("Lỗi khi xóa thành viên:", error);
-      window.alert("Lỗi khi xóa thành viên!");
+      showError("Lỗi", "Lỗi khi xóa thành viên!");
     } finally {
       setLoading(false);
     }
-  };
-
-  const cancelDelete = () => {
-    setShowModal(false);
-    setMemberToDelete(null);
   };
 
   return (
@@ -156,7 +162,7 @@ const GroupMembers = () => {
           />
           <button
             onClick={handleAddMember}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
             disabled={loading}
           >
             Thêm Thành viên
@@ -190,9 +196,9 @@ const GroupMembers = () => {
               </tr>
             </thead>
             <tbody>
-              {members.map((member) => (
+              {members.map((member, index) => (
                 <tr
-                  key={member.id}
+                  key={member.id || `member-${index}`}
                   className="border-b hover:bg-gray-50 transition duration-150"
                 >
                   <td className="py-4 px-6 text-gray-600">
@@ -202,8 +208,8 @@ const GroupMembers = () => {
                   <td className="py-4 px-6 text-gray-600">{member.chucVu}</td>
                   <td className="py-4 px-6 text-center">
                     <button
-                      onClick={() => handleDeleteMember(member.id)}
-                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200"
+                      onClick={() => handleDeleteMember(member.id, member.hoTen)}
+                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
                       disabled={loading}
                     >
                       Xóa khỏi nhóm
@@ -213,36 +219,6 @@ const GroupMembers = () => {
               ))}
             </tbody>
           </table>
-        </div>
-      )}
-
-      {/* Modal xác nhận xóa */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              Xác nhận xóa
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Bạn có chắc chắn muốn xóa thành viên này khỏi nhóm?
-            </p>
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={cancelDelete}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-200"
-                disabled={loading}
-              >
-                Hủy
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200"
-                disabled={loading}
-              >
-                Xóa
-              </button>
-            </div>
-          </div>
         </div>
       )}
 
@@ -282,9 +258,9 @@ const GroupMembers = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {availableUsers.map((user) => (
+                    {availableUsers.map((user, index) => (
                       <tr
-                        key={user.maNguoiDung}
+                        key={user.maNguoiDung || `user-${index}`}
                         className="border-b hover:bg-gray-50 transition duration-150"
                       >
                         <td className="py-4 px-6 text-gray-600">
@@ -292,7 +268,7 @@ const GroupMembers = () => {
                             type="checkbox"
                             checked={selectedUsers.includes(user.maNguoiDung)}
                             onChange={() => handleSelectUser(user.maNguoiDung)}
-                            className="h-4 w-4 text-blue-600 rounded"
+                            className="h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
                           />
                         </td>
                         <td className="py-4 px-6 text-gray-600">
@@ -316,14 +292,14 @@ const GroupMembers = () => {
             <div className="flex justify-end space-x-4 mt-6">
               <button
                 onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-200"
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
                 disabled={loading}
               >
                 Hủy
               </button>
               <button
                 onClick={handleConfirmAdd}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
                 disabled={loading}
               >
                 Thêm
@@ -337,7 +313,7 @@ const GroupMembers = () => {
         <button
           onClick={() => setMembersPage((prev) => Math.max(1, prev - 1))}
           disabled={membersPage === 1 || loading}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
         >
           Trang trước
         </button>
@@ -349,7 +325,7 @@ const GroupMembers = () => {
             setMembersPage((prev) => Math.min(totalMembersPages, prev + 1))
           }
           disabled={membersPage === totalMembersPages || loading}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
         >
           Trang sau
         </button>

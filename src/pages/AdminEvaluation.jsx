@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -20,6 +18,7 @@ import {
   Loader2,
   Save,
 } from "lucide-react";
+import { showSuccess, showError } from "../utils/notifications";
 
 const AdminEvaluation = () => {
   const [evaluations, setEvaluations] = useState([]);
@@ -31,11 +30,10 @@ const AdminEvaluation = () => {
   const [selectedEvaluation, setSelectedEvaluation] = useState(null);
   const [answers, setAnswers] = useState({});
   const [submitting, setSubmitting] = useState(false);
-  const [viewMode, setViewMode] = useState(false); // New state for view-only mode
+  const [viewMode, setViewMode] = useState(false);
   const maNguoiDung = localStorage.getItem("userId");
   const navigate = useNavigate();
 
-  // Format date to display
   const formatDate = (dateString) => {
     const options = {
       year: "numeric",
@@ -48,7 +46,6 @@ const AdminEvaluation = () => {
     return new Date(dateString).toLocaleDateString("vi-VN", options);
   };
 
-  // Set body overflow to hidden when the evaluation form is open
   useEffect(() => {
     if (showEvaluationForm) {
       document.body.style.overflow = "hidden";
@@ -63,11 +60,9 @@ const AdminEvaluation = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // First check if there's an active evaluation period
         const dotDanhGiaData = await getCurrentDotDanhGia();
         setDotDanhGia(dotDanhGiaData);
 
-        // If there is an active period, fetch the evaluation list
         if (dotDanhGiaData) {
           const evaluationData = await AdminGetListDanhGiaLeader(maNguoiDung);
           setEvaluations(evaluationData);
@@ -75,6 +70,7 @@ const AdminEvaluation = () => {
       } catch (err) {
         setError("Lỗi khi tải dữ liệu.");
         console.error(err);
+        showError("Lỗi", "Không thể tải dữ liệu. Vui lòng thử lại!");
       } finally {
         setLoading(false);
       }
@@ -86,16 +82,13 @@ const AdminEvaluation = () => {
   const handleEvaluate = async (evaluation) => {
     try {
       setSubmitting(true);
-      // Assuming the current user's ID is available (replace with actual user ID)
       const currentUserId = localStorage.getItem("userId");
-
       const data = await GetFormDanhGia(evaluation.maDanhGia);
 
       setEvaluationData(data);
       setSelectedEvaluation(evaluation);
       setViewMode(false);
 
-      // Initialize answers object with empty values
       const initialAnswers = {};
       data.danhSachCauHoi.forEach((question) => {
         initialAnswers[question.maCauHoi] = 0;
@@ -106,6 +99,7 @@ const AdminEvaluation = () => {
     } catch (err) {
       setError("Lỗi khi tải form đánh giá.");
       console.error(err);
+      showError("Lỗi", "Không thể tải form đánh giá. Vui lòng thử lại!");
     } finally {
       setSubmitting(false);
     }
@@ -114,34 +108,30 @@ const AdminEvaluation = () => {
   const handleEditEvaluation = async (evaluation) => {
     try {
       setSubmitting(true);
-
-      // Fetch the evaluation data by ID
       const data = await GetDanhGiaById(evaluation.maDanhGia);
 
-      // Set up the evaluation form with existing data
       setEvaluationData({
         danhSachCauHoi: data.danhSachCauTraLoi.map((answer) => ({
           maCauHoi: answer.maCauHoi,
           noiDung: answer.noiDung,
-          diemToiDa: 10, // Assuming max score is 10, adjust if needed
+          diemToiDa: 10,
         })),
       });
 
       setSelectedEvaluation(evaluation);
 
-      // Initialize answers with existing values
       const initialAnswers = {};
       data.danhSachCauTraLoi.forEach((answer) => {
         initialAnswers[answer.maCauHoi] = answer.traLoi;
       });
       setAnswers(initialAnswers);
 
-      setViewMode(false); // Edit mode
+      setViewMode(false);
       setShowEvaluationForm(true);
     } catch (err) {
       setError("Lỗi khi tải dữ liệu đánh giá.");
       console.error(err);
-      alert("Không thể tải dữ liệu đánh giá. Vui lòng thử lại sau.");
+      showError("Lỗi", "Không thể tải dữ liệu đánh giá. Vui lòng thử lại!");
     } finally {
       setSubmitting(false);
     }
@@ -150,41 +140,37 @@ const AdminEvaluation = () => {
   const handleViewEvaluation = async (evaluation) => {
     try {
       setSubmitting(true);
-
-      // Fetch the evaluation data by ID
       const data = await GetDanhGiaById(evaluation.maDanhGia);
 
-      // Set up the evaluation form with existing data
       setEvaluationData({
         danhSachCauHoi: data.danhSachCauTraLoi.map((answer) => ({
           maCauHoi: answer.maCauHoi,
           noiDung: answer.noiDung,
-          diemToiDa: 10, // Assuming max score is 10, adjust if needed
+          diemToiDa: 10,
         })),
       });
 
       setSelectedEvaluation(evaluation);
 
-      // Initialize answers with existing values
       const initialAnswers = {};
       data.danhSachCauTraLoi.forEach((answer) => {
         initialAnswers[answer.maCauHoi] = answer.traLoi;
       });
       setAnswers(initialAnswers);
 
-      setViewMode(true); // View-only mode
+      setViewMode(true);
       setShowEvaluationForm(true);
     } catch (err) {
       setError("Lỗi khi tải dữ liệu đánh giá.");
       console.error(err);
-      alert("Không thể tải dữ liệu đánh giá. Vui lòng thử lại sau.");
+      showError("Lỗi", "Không thể tải dữ liệu đánh giá. Vui lòng thử lại!");
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleAnswerChange = (questionId, value) => {
-    if (viewMode) return; // Prevent changes in view mode
+    if (viewMode) return;
 
     setAnswers((prev) => ({
       ...prev,
@@ -200,7 +186,7 @@ const AdminEvaluation = () => {
         (value) => value === 0
       );
       if (unansweredQuestions.length > 0) {
-        alert("Vui lòng trả lời tất cả các câu hỏi trước khi gửi đánh giá.");
+        showError("Lỗi", "Vui lòng trả lời tất cả các câu hỏi trước khi gửi đánh giá.");
         return;
       }
 
@@ -215,13 +201,14 @@ const AdminEvaluation = () => {
       await submitDanhGia(formData);
 
       setShowEvaluationForm(false);
-      alert("Đánh giá đã được gửi thành công!");
+      showSuccess("Thành công", "Đánh giá đã được gửi thành công!");
 
       const evaluationData = await AdminGetListDanhGiaLeader(maNguoiDung);
       setEvaluations(evaluationData);
     } catch (err) {
       setError("Lỗi khi gửi đánh giá.");
       console.error(err);
+      showError("Lỗi", "Không thể gửi đánh giá. Vui lòng thử lại!");
     } finally {
       setSubmitting(false);
     }
@@ -281,7 +268,6 @@ const AdminEvaluation = () => {
 
   return (
     <div className="w-full min-h-screen relative">
-      {/* Evaluation Form Modal */}
       {showEvaluationForm && evaluationData && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-start p-0 sm:p-4">
           <div className="bg-white rounded-none sm:rounded-lg shadow-xl max-w-full sm:max-w-4xl w-full h-screen sm:h-auto max-h-screen sm:max-h-[90vh] overflow-y-auto">
@@ -429,7 +415,6 @@ const AdminEvaluation = () => {
 
       <div className="w-full">
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          {/* Header */}
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center flex-wrap gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-800 flex items-center">
@@ -451,7 +436,6 @@ const AdminEvaluation = () => {
             </div>
           </div>
 
-          {/* Content */}
           <div className="px-0">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">

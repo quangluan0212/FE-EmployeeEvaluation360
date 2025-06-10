@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -340,12 +338,12 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="w-full h-full min-h-screen">
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-3 py-4">
+    <div className="w-full h-full min-h-screen py-2 px-2">
+      <div className="w-full h-full">
         {/* Enhanced Header */}
         <div className="mb-8">
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-            <div className="bg-gradient-to-r from-indigo-600 via-blue-500 to-cyan-600 px-6 py-6">
+            <div className="bg-gradient-to-r from-indigo-600 via-blue-500 to-cyan-600 px-2 py-2">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">

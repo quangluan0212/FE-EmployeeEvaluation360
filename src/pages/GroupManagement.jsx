@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useState, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { getDanhSachNhomPaged, addNhom, updateNhom, deleteNhom } from "../api/Nhom"
@@ -19,6 +17,7 @@ import {
   AlertTriangle,
   UserPlus,
 } from "lucide-react"
+import { showSuccess, showError, showConfirm } from "../utils/notifications"
 
 const GroupManagement = () => {
   const navigate = useNavigate()
@@ -58,6 +57,7 @@ const GroupManagement = () => {
       setTotalPages(response.totalPages || 1)
     } catch {
       setError("Không thể tải danh sách nhóm. Vui lòng thử lại sau.")
+      showError("Lỗi", "Không thể tải danh sách nhóm. Vui lòng thử lại!")
     } finally {
       setIsLoading(false)
     }
@@ -70,6 +70,7 @@ const GroupManagement = () => {
       setProjects(res || [])
     } catch {
       setError("Không thể tải danh sách dự án. Vui lòng thử lại sau.")
+      showError("Lỗi", "Không thể tải danh sách dự án. Vui lòng thử lại!")
     }
   }, [])
 
@@ -106,14 +107,23 @@ const GroupManagement = () => {
   }
 
   const handleDeleteGroup = async (maNhom) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa nhóm này?")) return
+    const result = await showConfirm(
+      "Xác nhận xóa",
+      "Bạn có chắc chắn muốn xóa nhóm này? Hành động này không thể hoàn tác.",
+      "Xóa",
+      "Hủy",
+      { confirmButtonColor: "#dc2626" }
+    )
+
+    if (!result.isConfirmed) return
+
     try {
       await deleteNhom(maNhom)
-      alert("Xóa nhóm thành công!")
+      showSuccess("Thành công", "Xóa nhóm thành công!")
       await fetchGroups()
     } catch (err) {
       console.error(err)
-      alert("Xóa nhóm thất bại: " + (err.message || ""))
+      showError("Lỗi", "Xóa nhóm thất bại: " + (err.message || "Vui lòng thử lại!"))
     }
   }
 
@@ -131,31 +141,39 @@ const GroupManagement = () => {
   const handleSaveGroup = async () => {
     const errs = validateForm()
     if (errs.length) {
-      alert(errs.join("\n"))
+      showError("Lỗi", errs.join("\n"))
       return
     }
     try {
       if (currentGroup.maNhom) {
-        // update
+        const result = await showConfirm(
+          "Xác nhận cập nhật",
+          "Bạn có chắc chắn muốn cập nhật nhóm này?",
+          "Cập nhật",
+          "Hủy",
+          { confirmButtonColor: "#7c3aed" }
+        )
+
+        if (!result.isConfirmed) return
+
         await updateNhom(currentGroup.maNhom, {
           tenNhom: currentGroup.tenNhom.trim(),
           maDuAn: Number.parseInt(currentGroup.maDuAn),
           trangThai: currentGroup.trangThai,
         })
-        alert("Cập nhật nhóm thành công!")
+        showSuccess("Thành công", "Cập nhật nhóm thành công!")
       } else {
-        // add
         await addNhom({
           tenNhom: currentGroup.tenNhom.trim(),
           maDuAn: Number.parseInt(currentGroup.maDuAn),
         })
-        alert("Thêm nhóm thành công!")
+        showSuccess("Thành công", "Thêm nhóm thành công!")
       }
       await fetchGroups()
       setShowModal(false)
     } catch (err) {
       console.error(err)
-      alert("Thao tác thất bại: " + (err.message || ""))
+      showError("Lỗi", "Thao tác thất bại: " + (err.message || "Vui lòng thử lại!"))
     }
   }
 
@@ -165,7 +183,7 @@ const GroupManagement = () => {
   }
 
   return (
-    <div className="w-full mx-auto p-6 bg-gradient-to-br from-white to-gray-50 shadow-xl rounded-xl">
+    <div className="w-full mx-auto p-6 bg-gradient-to-br from-white to-gray-50 shadow-xl rounded-xl py-2 px-2">
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div className="flex items-center">
           <Users className="h-7 w-7 text-blue-600 mr-3" />
@@ -179,7 +197,7 @@ const GroupManagement = () => {
               value={searchTerm}
               onChange={handleSearchChange}
               placeholder="Tìm kiếm nhóm..."
-              className="pl-10 pr-4 py-2.5 w-full md:w-64 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="pl-10 pr-4 py-2.5 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
@@ -188,7 +206,7 @@ const GroupManagement = () => {
 
           <button
             onClick={handleAddGroup}
-            className="w-full md:w-auto px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center"
+            className="w-full px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center"
           >
             <PlusCircle className="h-5 w-5 mr-2" />
             Thêm Nhóm
@@ -293,7 +311,6 @@ const GroupManagement = () => {
         )}
       </div>
 
-      {/* Pagination */}
       <div className="flex justify-between items-center mt-6 bg-white p-4 rounded-xl shadow-md">
         <button
           onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
@@ -328,7 +345,6 @@ const GroupManagement = () => {
         </button>
       </div>
 
-      {/* Modal for adding/editing group */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md transform transition-all animate-fade-in-up">
@@ -375,7 +391,6 @@ const GroupManagement = () => {
                 <select
                   key={currentGroup.maDuAn}
                   value={currentGroup.maDuAn.toString()}
-                  defaultChecked={currentGroup.maDuAn}
                   onChange={(e) => setCurrentGroup({ ...currentGroup, maDuAn: e.target.value })}
                   className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                 >

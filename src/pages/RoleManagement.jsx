@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import { getChucVuPagedList, addChucVu, updateChucVu, deleteChucVu } from "../api/ChucVu"
 import {
@@ -16,6 +14,7 @@ import {
   AlertCircle,
   XCircle,
 } from "lucide-react"
+import { showSuccess, showError, showConfirm } from "../utils/notifications"
 
 const RoleManagement = () => {
   const [roles, setRoles] = useState([])
@@ -40,6 +39,7 @@ const RoleManagement = () => {
         setTotalPages(response.totalPages)
       } catch (error) {
         console.error("Lỗi khi lấy danh sách chức vụ:", error)
+        showError("Lỗi", "Không thể tải danh sách chức vụ. Vui lòng thử lại!")
       } finally {
         setIsLoading(false)
       }
@@ -65,18 +65,23 @@ const RoleManagement = () => {
   }
 
   const handleDeleteRole = async (maChucVu) => {
-    const userConfirmed = window.confirm("Bạn có chắc chắn muốn xóa chức vụ này?")
-    if (!userConfirmed) {
-      return // Exit if the user cancels the action
-    }
+    const result = await showConfirm(
+      "Xác nhận xóa",
+      "Bạn có chắc chắn muốn xóa chức vụ này? Hành động này không thể hoàn tác.",
+      "Xóa",
+      "Hủy",
+      { confirmButtonColor: "#dc2626" }
+    )
+
+    if (!result.isConfirmed) return
 
     try {
       const response = await deleteChucVu(maChucVu)
-      alert(response.message || "Xóa chức vụ thành công!")
+      showSuccess("Thành công", response.message || "Xóa chức vụ thành công!")
       setRoles((prevRoles) => prevRoles.filter((role) => role.maChucVu !== maChucVu))
     } catch (error) {
       console.error("Lỗi khi xóa chức vụ:", error)
-      alert("Xóa chức vụ thất bại. Vui lòng thử lại!")
+      showError("Lỗi", "Xóa chức vụ thất bại. Vui lòng thử lại!")
     }
   }
 
@@ -89,6 +94,7 @@ const RoleManagement = () => {
       setTotalPages(response.totalPages)
     } catch (error) {
       console.error("Lỗi khi tìm kiếm chức vụ:", error)
+      showError("Lỗi", "Không thể tìm kiếm chức vụ. Vui lòng thử lại!")
     } finally {
       setIsLoading(false)
     }
@@ -101,34 +107,37 @@ const RoleManagement = () => {
   const handleSaveRole = async () => {
     try {
       if (!currentRole.tenChucVu) {
-        alert("Tên chức vụ không được để trống!")
+        showError("Lỗi", "Tên chức vụ không được để trống!")
         return
       }
 
       if (currentRole.maChucVu) {
-        const userConfirmed = window.confirm("Bạn có chắc chắn muốn cập nhật chức vụ này?")
-        if (!userConfirmed) {
-          return // Exit if the user cancels the action
-        }
+        const result = await showConfirm(
+          "Xác nhận cập nhật",
+          "Bạn có chắc chắn muốn cập nhật chức vụ này?",
+          "Cập nhật",
+          "Hủy",
+          { confirmButtonColor: "#7c3aed" }
+        )
 
-        // Update existing role
+        if (!result.isConfirmed) return
+
         const updatedRole = await updateChucVu(currentRole.maChucVu, {
           tenChucVu: currentRole.tenChucVu,
           trangThai: currentRole.trangThai,
         })
-        alert("Cập nhật chức vụ thành công!")
+        showSuccess("Thành công", "Cập nhật chức vụ thành công!")
         setRoles((prevRoles) => prevRoles.map((role) => (role.maChucVu === updatedRole.maChucVu ? updatedRole : role)))
       } else {
-        // Add new role
         const newRole = await addChucVu({ tenChucVu: currentRole.tenChucVu })
-        alert("Thêm chức vụ thành công!")
+        showSuccess("Thành công", "Thêm chức vụ thành công!")
         setRoles((prevRoles) => [...prevRoles, newRole])
       }
 
       setShowModal(false)
     } catch (error) {
       console.error("Lỗi khi lưu chức vụ:", error)
-      alert("Lưu chức vụ thất bại. Vui lòng thử lại!")
+      showError("Lỗi", "Lưu chức vụ thất bại. Vui lòng thử lại!")
     }
   }
 
@@ -197,7 +206,6 @@ const RoleManagement = () => {
         </div>
       </div>
 
-      {/* Role Table */}
       <div className="overflow-x-auto bg-white rounded-xl shadow-md">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -263,7 +271,6 @@ const RoleManagement = () => {
         </table>
       </div>
 
-      {/* Pagination */}
       <div className="flex justify-between items-center mt-6 bg-white p-4 rounded-xl shadow-md">
         <button
           onClick={() => handlePageChange(currentPage - 1)}
@@ -298,7 +305,6 @@ const RoleManagement = () => {
         </button>
       </div>
 
-      {/* Modal for adding/editing role */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md transform transition-all animate-fade-in-up">
@@ -357,7 +363,7 @@ const RoleManagement = () => {
               </button>
               <button
                 onClick={handleSaveRole}
-                className="px-4 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg hover:from-purple-600 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 flex items-center"
+                className="px-4 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg hover:from-purple-600 hover:to-indigo-700 text-gray-800 transition-all shadow-md hover:shadow-md focus:outline-none focus:ring-2 focus:ring-gray-700 flex items-center"
               >
                 <Save className="h-4 w-4 mr-2" />
                 {currentRole.maChucVu ? "Cập nhật" : "Lưu"}

@@ -140,8 +140,8 @@ const AdminDetailsEvaluation = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-6 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="w-full h-full py-2 px-2">
+      <div className="w-full h-full mx-auto">
         {/* Enhanced Header */}
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-4">

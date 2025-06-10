@@ -16,6 +16,7 @@ import {
   Shield,
   CheckCircle,
 } from "lucide-react"
+import { showSuccess, showError } from "../utils/notifications"
 
 const Profile = () => {
   const [userDetails, setUserDetails] = useState(null)
@@ -45,6 +46,7 @@ const Profile = () => {
         })
       } catch (error) {
         console.error("Lỗi khi lấy thông tin người dùng:", error)
+        showError("Lỗi", "Không thể tải thông tin người dùng. Vui lòng thử lại!")
       }
     }
 
@@ -53,24 +55,23 @@ const Profile = () => {
 
   const handleChangePassword = async () => {
     if (newPassword !== confirmNewPassword) {
-      alert("Mật khẩu mới và xác nhận mật khẩu không khớp!")
+      showError("Lỗi", "Mật khẩu mới và xác nhận mật khẩu không khớp!")
       return
     }
 
     try {
       await changePassword({ currentPassword, newPassword })
-      alert("Thay đổi mật khẩu thành công!")
+      showSuccess("Thành công", "Thay đổi mật khẩu thành công!")
       setShowChangePasswordModal(false)
       setCurrentPassword("")
       setNewPassword("")
       setConfirmNewPassword("")
     } catch (error) {
-      alert("Thay đổi mật khẩu thất bại. Vui lòng kiểm tra lại thông tin!")
+      showError("Lỗi", "Thay đổi mật khẩu thất bại. Vui lòng kiểm tra lại thông tin!")
     }
   }
 
   const handleUpdateInfo = async () => {
-    console.log("Cập nhật thông tin:", updatedUserDetails)
     try {
       await updateUserInfo(updatedUserDetails)
       setUserDetails({
@@ -79,14 +80,13 @@ const Profile = () => {
         email: updatedUserDetails.email,
         dienThoai: updatedUserDetails.dienThoai,
       })
-      alert("Cập nhật thông tin thành công!")
+      showSuccess("Thành công", "Cập nhật thông tin thành công!")
       setShowUpdateInfoModal(false)
     } catch (error) {
-      alert("Cập nhật thông tin thất bại. Vui lòng kiểm tra lại thông tin!")
+      showError("Lỗi", "Cập nhật thông tin thất bại. Vui lòng kiểm tra lại thông tin!")
     }
   }
 
-  // Format date
   const formatDate = (dateString) => {
     if (!dateString) return "N/A"
     const options = {
@@ -112,20 +112,17 @@ const Profile = () => {
   }
 
   return (
-    <div className="h-full w-full py-4 px-4">
+    <div className="h-full w-full py-2 px-2">
       <div className="w-full h-full mx-auto">
-        {/* Header Section */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Hồ sơ cá nhân</h1>
           <p className="text-gray-600">Quản lý thông tin và cài đặt tài khoản của bạn</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Profile Card */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
               <div className="text-center">
-                {/* Avatar with enhanced styling */}
                 <div className="relative inline-block mb-6">
                   <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-full opacity-75 blur-sm"></div>
                   <div className="relative">
@@ -145,7 +142,6 @@ const Profile = () => {
                   ID: {userDetails.maNguoiDung}
                 </p>
 
-                {/* Status badges */}
                 <div className="space-y-3 mb-6">
                   <div className="flex items-center justify-center space-x-2 text-sm">
                     <Award className="w-4 h-4 text-amber-500" />
@@ -173,9 +169,7 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Contact Information Card */}
             <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-gray-900 flex items-center">
@@ -222,7 +216,6 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Security Card */}
             <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-gray-900 flex items-center">
@@ -251,7 +244,6 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* Enhanced Change Password Modal */}
       {showChangePasswordModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100">
@@ -353,7 +345,6 @@ const Profile = () => {
         </div>
       )}
 
-      {/* Enhanced Update Info Modal */}
       {showUpdateInfoModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100">
