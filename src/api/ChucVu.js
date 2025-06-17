@@ -1,5 +1,49 @@
 import apiClient from "./api";
 
+export const GetCapBacChucVu = async ( maNguoiDung, maChucVu) => {
+    try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            throw new Error('Token không tồn tại');
+        }
+
+        const response = await apiClient.get('/ChucVu/admin-get-cap-bac-nguoi-dung', {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            params: {
+                maNguoiDung: maNguoiDung,
+                maChucVu: maChucVu
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Lỗi khi lấy danh sách chức vụ:', error);
+        throw error;
+    }
+};
+
+
+export const UpdateChucVu = async (formData) => {
+    try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            throw new Error('Token không tồn tại');
+        }
+
+        const response = await apiClient.put('/ChucVu/admin-cap-nhat-chuc-vu', formData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Lỗi khi lấy danh sách chức vụ:', error);
+        throw error;
+    }
+};
+
 export const getChucVuList = async () => {
     try {
         const token = localStorage.getItem('authToken');

@@ -369,6 +369,7 @@ const Profile = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Họ và tên</label>
                   <input
                     type="text"
+                    disabled="true"
                     value={updatedUserDetails.hoTen}
                     onChange={(e) =>
                       setUpdatedUserDetails({

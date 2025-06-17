@@ -337,11 +337,8 @@ const Evaluations = () => {
                         className={`hover:bg-gray-50 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm mr-3">
-                              {result.maDotDanhGia?.toString().slice(-2) || "??"}
-                            </div>
-                            <div className="text-sm font-semibold text-gray-900">Đợt {result.maDotDanhGia}</div>
+                          <div className="flex items-center">                            
+                            <div className="text-sm font-semibold text-gray-900">Đợt {result.tenDotDanhGia}</div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -350,7 +347,7 @@ const Evaluations = () => {
                               className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
                                 result.diemTongKet >= 90
                                   ? "bg-green-100 text-green-800"
-                                  : result.diemTongKet >= 40
+                                  : result.diemTongKet > 40
                                     ? "bg-orange-100 text-orange-800"
                                     : "bg-red-100 text-red-800"
                               }`}
@@ -373,7 +370,7 @@ const Evaluations = () => {
                                 <CheckCircle className="h-3 w-3 mr-1" />
                                 Xuất sắc
                               </span>
-                            ) : result.diemTongKet >= 40 ? (
+                            ) : result.diemTongKet > 40 ? (
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                                 <AlertCircle className="h-3 w-3 mr-1" />
                                 Khá

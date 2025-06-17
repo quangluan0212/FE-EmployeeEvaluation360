@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import {
   getCurrentDotDanhGia,
@@ -22,6 +24,7 @@ import {
   ChevronUp,
   UserCheck,
 } from "lucide-react";
+import { showSuccess, showError, showWarning } from "../utils/notifications";
 
 const UserEvaluation = () => {
   const [groupsData, setGroupsData] = useState([]);
@@ -35,6 +38,7 @@ const UserEvaluation = () => {
   const [submitting, setSubmitting] = useState(false);
   const [viewMode, setViewMode] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState({});
+  const [activeTab, setActiveTab] = useState("group"); // "group" or "self"
   const maNguoiDung = localStorage.getItem("userId");
 
   // Format date to display
@@ -49,6 +53,7 @@ const UserEvaluation = () => {
     };
     return new Date(dateString).toLocaleDateString("vi-VN", options);
   };
+
   // Set body overflow to hidden when the evaluation form is open
   useEffect(() => {
     if (showEvaluationForm) {
@@ -56,7 +61,6 @@ const UserEvaluation = () => {
     } else {
       document.body.classList.remove("overflow-hidden");
     }
-
     return () => {
       document.body.classList.remove("overflow-hidden");
     };
@@ -68,15 +72,12 @@ const UserEvaluation = () => {
         // First check if there's an active evaluation period
         const dotDanhGiaData = await getCurrentDotDanhGia();
         setDotDanhGia(dotDanhGiaData);
-
         // If there is an active period, fetch the evaluation list for the groups
         if (dotDanhGiaData) {
           const data = await UserGetListDanhGia(maNguoiDung);
-
           // Ensure data is an array
           const groupsList = Array.isArray(data) ? data : [data];
           setGroupsData(groupsList);
-
           // Initialize all groups as expanded
           const initialExpandedState = {};
           groupsList.forEach((group, index) => {
@@ -106,22 +107,20 @@ const UserEvaluation = () => {
     try {
       setSubmitting(true);
       const data = await GetFormDanhGia(evaluation.maDanhGia);
-
       setEvaluationData(data);
       setSelectedEvaluation(evaluation);
       setViewMode(false);
-
       // Initialize answers object with empty values
       const initialAnswers = {};
       data.danhSachCauHoi.forEach((question) => {
         initialAnswers[question.maCauHoi] = 0;
       });
       setAnswers(initialAnswers);
-
       setShowEvaluationForm(true);
     } catch (err) {
       setError("Lỗi khi tải form đánh giá.");
       console.error(err);
+      showError("Lỗi", "Không thể tải form đánh giá. Vui lòng thử lại sau!");
     } finally {
       setSubmitting(false);
     }
@@ -130,10 +129,8 @@ const UserEvaluation = () => {
   const handleEditEvaluation = async (evaluation) => {
     try {
       setSubmitting(true);
-
       // Fetch the evaluation data by ID
       const data = await GetDanhGiaById(evaluation.maDanhGia);
-
       // Set up the evaluation form with existing data
       setEvaluationData({
         danhSachCauHoi: data.danhSachCauTraLoi.map((answer) => ({
@@ -144,7 +141,6 @@ const UserEvaluation = () => {
       });
 
       setSelectedEvaluation(evaluation);
-
       // Initialize answers with existing values
       const initialAnswers = {};
       data.danhSachCauTraLoi.forEach((answer) => {
@@ -157,7 +153,7 @@ const UserEvaluation = () => {
     } catch (err) {
       setError("Lỗi khi tải dữ liệu đánh giá.");
       console.error(err);
-      alert("Không thể tải dữ liệu đánh giá. Vui lòng thử lại sau.");
+      showError("Lỗi", "Không thể tải dữ liệu đánh giá. Vui lòng thử lại sau!");
     } finally {
       setSubmitting(false);
     }
@@ -193,7 +189,7 @@ const UserEvaluation = () => {
     } catch (err) {
       setError("Lỗi khi tải dữ liệu đánh giá.");
       console.error(err);
-      alert("Không thể tải dữ liệu đánh giá. Vui lòng thử lại sau.");
+      showError("Lỗi", "Không thể tải dữ liệu đánh giá. Vui lòng thử lại sau!");
     } finally {
       setSubmitting(false);
     }
@@ -211,12 +207,14 @@ const UserEvaluation = () => {
   const handleSubmitEvaluation = async () => {
     try {
       setSubmitting(true);
-
       const unansweredQuestions = Object.values(answers).filter(
         (value) => value === 0
       );
       if (unansweredQuestions.length > 0) {
-        alert("Vui lòng trả lời tất cả các câu hỏi trước khi gửi đánh giá.");
+        showWarning(
+          "Cảnh báo",
+          "Vui lòng trả lời tất cả các câu hỏi trước khi gửi đánh giá!"
+        );
         return;
       }
 
@@ -229,10 +227,8 @@ const UserEvaluation = () => {
       };
 
       await submitDanhGia(formData);
-
       setShowEvaluationForm(false);
-      alert("Đánh giá đã được gửi thành công!");
-
+      showSuccess("Thành công", "Đánh giá đã được gửi thành công!");
       // Refresh the evaluation list
       const data = await UserGetListDanhGia(maNguoiDung);
       const groupsList = Array.isArray(data) ? data : [data];
@@ -240,6 +236,7 @@ const UserEvaluation = () => {
     } catch (err) {
       setError("Lỗi khi gửi đánh giá.");
       console.error(err);
+      showError("Lỗi", "Không thể gửi đánh giá. Vui lòng thử lại sau!");
     } finally {
       setSubmitting(false);
     }
@@ -257,19 +254,76 @@ const UserEvaluation = () => {
   const getGroupStats = (group) => {
     if (!group || !Array.isArray(group.thanhViens))
       return { total: 0, completed: 0, percentage: 0 };
-
     const total = group.thanhViens.length;
     const completed = group.thanhViens.filter(
       (member) => member.trangThai !== "Chưa đánh giá"
     ).length;
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+    return { total, completed, percentage };
+  };
 
+  // Calculate completion stats for self evaluations only
+  const getSelfEvaluationStats = (group) => {
+    if (!group || !Array.isArray(group.thanhViens))
+      return { total: 0, completed: 0, percentage: 0 };
+    const selfEvaluations = group.thanhViens.filter(
+      (member) => member.maNguoiDuocDanhGia === maNguoiDung
+    );
+    const total = selfEvaluations.length;
+    const completed = selfEvaluations.filter(
+      (member) => member.trangThai !== "Chưa đánh giá"
+    ).length;
+    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+    return { total, completed, percentage };
+  };
+
+  // Calculate completion stats for group evaluations only (excluding self)
+  const getGroupEvaluationStats = (group) => {
+    if (!group || !Array.isArray(group.thanhViens))
+      return { total: 0, completed: 0, percentage: 0 };
+    const groupEvaluations = group.thanhViens.filter(
+      (member) => member.maNguoiDuocDanhGia !== maNguoiDung
+    );
+    const total = groupEvaluations.length;
+    const completed = groupEvaluations.filter(
+      (member) => member.trangThai !== "Chưa đánh giá"
+    ).length;
+    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
     return { total, completed, percentage };
   };
 
   // Check if an evaluation is a self-evaluation
   const isSelfEvaluation = (member) => {
     return member.maNguoiDuocDanhGia === maNguoiDung;
+  };
+
+  // Filter members based on active tab
+  const getFilteredMembers = (members) => {
+    if (activeTab === "self") {
+      return members.filter((member) => isSelfEvaluation(member));
+    } else {
+      return members.filter((member) => !isSelfEvaluation(member));
+    }
+  };
+
+  // Get total stats for the active tab
+  const getTotalStats = () => {
+    let totalMembers = 0;
+    let completedMembers = 0;
+    groupsData.forEach((group) => {
+      if (group && Array.isArray(group.thanhViens)) {
+        const filteredMembers = getFilteredMembers(group.thanhViens);
+        totalMembers += filteredMembers.length;
+        completedMembers += filteredMembers.filter(
+          (member) => member.trangThai !== "Chưa đánh giá"
+        ).length;
+      }
+    });
+    const percentage =
+      totalMembers > 0
+        ? Math.round((completedMembers / totalMembers) * 100)
+        : 0;
+    return { total: totalMembers, completed: completedMembers, percentage };
   };
 
   if (loading) {
@@ -280,7 +334,6 @@ const UserEvaluation = () => {
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4">
@@ -296,7 +349,6 @@ const UserEvaluation = () => {
       </div>
     );
   }
-
   if (!dotDanhGia) {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4">
@@ -315,7 +367,6 @@ const UserEvaluation = () => {
       </div>
     );
   }
-
   if (!Array.isArray(groupsData) || groupsData.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4">
@@ -333,7 +384,7 @@ const UserEvaluation = () => {
       </div>
     );
   }
-
+  const totalStats = getTotalStats();
   return (
     <div className="w-full min-h-screen relative py-2 px-2">
       {/* Evaluation Form Modal */}
@@ -527,7 +578,7 @@ const UserEvaluation = () => {
             <div>
               <h1 className="text-2xl font-bold text-gray-800 flex items-center">
                 <Users className="h-6 w-6 mr-2 text-cyan-600" />
-                Đánh giá nhóm & Tự đánh giá
+                Hệ thống đánh giá
               </h1>
             </div>
 
@@ -542,6 +593,56 @@ const UserEvaluation = () => {
               </p>
             </div>
           </div>
+
+          {/* Tab Navigation */}
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+              <button
+                onClick={() => setActiveTab("group")}
+                className={`flex-1 flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === "group"
+                    ? "bg-white text-cyan-700 shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Đánh giá thành viên trong nhóm
+              </button>
+              <button
+                onClick={() => setActiveTab("self")}
+                className={`flex-1 flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === "self"
+                    ? "bg-white text-purple-700 shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                <UserCheck className="h-4 w-4 mr-2" />
+                Tự đánh giá
+              </button>
+            </div>
+
+            {/* Overall Progress */}
+            <div className="mt-4 flex items-center justify-between">
+              <div className="flex items-center">
+                <span className="text-sm font-medium text-gray-700 mr-3">
+                  Tiến độ{" "}
+                  {activeTab === "self" ? "tự đánh giá" : "đánh giá nhóm"}:
+                </span>
+                <div className="w-48 bg-gray-200 rounded-full h-2.5 mr-2">
+                  <div
+                    className={`h-2.5 rounded-full ${
+                      activeTab === "self" ? "bg-purple-600" : "bg-cyan-600"
+                    }`}
+                    style={{ width: `${totalStats.percentage}%` }}
+                  ></div>
+                </div>
+                <span className="text-sm text-gray-600">
+                  {totalStats.completed}/{totalStats.total} (
+                  {totalStats.percentage}%)
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Groups */}
@@ -551,7 +652,17 @@ const UserEvaluation = () => {
             return null;
           }
 
-          const { total, completed, percentage } = getGroupStats(group);
+          const filteredMembers = getFilteredMembers(group.thanhViens);
+
+          // Skip rendering if no members match the current tab
+          if (filteredMembers.length === 0) {
+            return null;
+          }
+
+          const stats =
+            activeTab === "self"
+              ? getSelfEvaluationStats(group)
+              : getGroupEvaluationStats(group);
 
           return (
             <div
@@ -564,9 +675,22 @@ const UserEvaluation = () => {
                 onClick={() => toggleGroupExpanded(groupIndex)}
               >
                 <div className="flex items-center">
-                  <User className="h-5 w-5 mr-2 text-cyan-600" />
+                  <User
+                    className={`h-5 w-5 mr-2 ${
+                      activeTab === "self" ? "text-purple-600" : "text-cyan-600"
+                    }`}
+                  />
                   <h2 className="text-lg font-semibold text-gray-800">
-                    Nhóm: <span className="text-cyan-700">{group.tenNhom}</span>
+                    Nhóm:{" "}
+                    <span
+                      className={
+                        activeTab === "self"
+                          ? "text-purple-700"
+                          : "text-cyan-700"
+                      }
+                    >
+                      {group.tenNhom}
+                    </span>
                   </h2>
                 </div>
 
@@ -576,12 +700,16 @@ const UserEvaluation = () => {
                     <div className="flex items-center">
                       <div className="w-48 bg-gray-200 rounded-full h-2.5 mr-2">
                         <div
-                          className="bg-cyan-600 h-2.5 rounded-full"
-                          style={{ width: `${percentage}%` }}
+                          className={`h-2.5 rounded-full ${
+                            activeTab === "self"
+                              ? "bg-purple-600"
+                              : "bg-cyan-600"
+                          }`}
+                          style={{ width: `${stats.percentage}%` }}
                         ></div>
                       </div>
                       <span className="text-sm text-gray-600">
-                        {completed}/{total}
+                        {stats.completed}/{stats.total}
                       </span>
                     </div>
                   </div>
@@ -634,17 +762,19 @@ const UserEvaluation = () => {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {group.thanhViens.length === 0 ? (
+                        {filteredMembers.length === 0 ? (
                           <tr>
                             <td
                               colSpan={5}
                               className="px-6 py-10 text-center text-sm text-gray-500"
                             >
-                              Không có thành viên nào trong nhóm
+                              {activeTab === "self"
+                                ? "Không có tự đánh giá nào trong nhóm này"
+                                : "Không có thành viên nào để đánh giá trong nhóm này"}
                             </td>
                           </tr>
                         ) : (
-                          group.thanhViens.map((member) => {
+                          filteredMembers.map((member) => {
                             const isSelf = isSelfEvaluation(member);
                             return (
                               <tr
@@ -768,5 +898,4 @@ const UserEvaluation = () => {
     </div>
   );
 };
-
 export default UserEvaluation;
