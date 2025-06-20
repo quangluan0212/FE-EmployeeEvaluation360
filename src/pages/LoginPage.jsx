@@ -27,7 +27,7 @@ const LoginPage = () => {
             if (roles.includes("Admin")) {
               navigate("/admin-dashboard");
             } else {
-              navigate("/profile");
+              navigate("/user-evaluations");
             }
           }, 1000);
         }
@@ -63,7 +63,7 @@ const LoginPage = () => {
       if (roles.includes("Admin")) {
         navigate("/admin-dashboard");
       } else {
-        navigate("/profile");
+        navigate("/user-evaluations");
       }
     } catch (error) {
       setMessage("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");

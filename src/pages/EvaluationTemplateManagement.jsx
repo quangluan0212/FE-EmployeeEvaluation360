@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   GetAllMauDanhGiaPagedAsync,
   addMauDanhGia,
+  getMauDanhGiaById,
   updateMauDanhGia,
   deleteMauDanhGia,
 } from "../api/MauDanhGia";
@@ -28,6 +29,7 @@ const EvaluationTemplateManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [validationError, setValidationError] = useState("");
+  const [totalPoints, setTotalPoints] = useState(0); // Thêm state cho tổng điểm
 
   const [currentTemplate, setCurrentTemplate] = useState({
     maMauDanhGia: "",
@@ -100,6 +102,15 @@ const EvaluationTemplateManagement = () => {
     fetchTemplates();
   }, [currentPage, searchTerm]);
 
+  useEffect(() => {
+    // Cập nhật tổng điểm khi danhSachCauHoi thay đổi
+    const total = currentTemplate.danhSachCauHoi.reduce(
+      (sum, q) => sum + Number(q.diemToiDa),
+      0
+    );
+    setTotalPoints(total);
+  }, [currentTemplate.danhSachCauHoi]);
+
   const handleAddTemplate = () => {
     setCurrentTemplate({
       maMauDanhGia: "",
@@ -111,18 +122,32 @@ const EvaluationTemplateManagement = () => {
     setShowModal(true);
   };
 
-  const handleEditTemplate = (template) => {
-    setCurrentTemplate({
-      maMauDanhGia: template.maMauDanhGia,
-      tenMau: template.tenMau,
-      loaiDanhGia: template.loaiDanhGia,
-      danhSachCauHoi:
-        template.danhSachCauHoi.length > 0
-          ? template.danhSachCauHoi
-          : [{ noiDung: "", diemToiDa: 0 }],
-    });
-    setValidationError("");
-    setShowModal(true);
+  const handleEditTemplate = async (template) => {
+    setIsLoading(true);
+    try {
+      const response = await getMauDanhGiaById(template.maMauDanhGia);
+      if (response) {
+        const detailedTemplate = response;
+        setCurrentTemplate({
+          maMauDanhGia: detailedTemplate.maMauDanhGia,
+          tenMau: detailedTemplate.tenMauDanhGia,
+          loaiDanhGia: detailedTemplate.loaiDanhGia,
+          danhSachCauHoi:
+            detailedTemplate.danhSachCauHoi && detailedTemplate.danhSachCauHoi.length > 0
+              ? detailedTemplate.danhSachCauHoi
+              : [{ noiDung: "", diemToiDa: 0 }],
+        });
+        setValidationError("");
+        setShowModal(true);
+      } else {
+        showError("Lỗi", "Không thể tải thông tin mẫu đánh giá!");
+      }
+    } catch (error) {
+      console.error("Error fetching template details:", error);
+      showError("Lỗi", "Không thể tải thông tin mẫu đánh giá. Vui lòng thử lại!");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDeleteTemplate = async (maMauDanhGia) => {
@@ -171,10 +196,13 @@ const EvaluationTemplateManagement = () => {
   };
 
   const handleRemoveQuestion = (index) => {
-    setCurrentTemplate((prev) => ({
-      ...prev,
-      danhSachCauHoi: prev.danhSachCauHoi.filter((_, i) => i !== index),
-    }));
+    setCurrentTemplate((prev) => {
+      const newQuestions = prev.danhSachCauHoi.filter((_, i) => i !== index);
+      return {
+        ...prev,
+        danhSachCauHoi: newQuestions,
+      };
+    });
   };
 
   const handleQuestionChange = (index, field, value) => {
@@ -290,7 +318,7 @@ const EvaluationTemplateManagement = () => {
   };
 
   return (
-    <div className="w-full mx-auto p-6 bg-gradient-to-br from-white to-gray-50 shadow-xl rounded-xl">
+    <div className="w-full h-full mx-auto p-6 bg-gradient-to-br from-white to-gray-50 shadow-xl rounded-xl">
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div className="flex items-center">
           <FileText className="h-7 w-7 text-indigo-600 mr-3" />
@@ -300,7 +328,7 @@ const EvaluationTemplateManagement = () => {
         </div>
 
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-          <div className="relative w-full md:w-auto">
+          <div className="relative w-full h-full md:w-auto">
             <input
               type="text"
               value={searchTerm}
@@ -577,6 +605,13 @@ const EvaluationTemplateManagement = () => {
                     <PlusCircle className="h-4 w-4 mr-2" />
                     Thêm câu hỏi
                   </button>
+                </div>
+                {/* Hiển thị tổng điểm */}
+                <div className="mt-2 text-sm text-gray-700">
+                  Tổng điểm: <span className={totalPoints === 100 ? "text-green-600 font-semibold" : "text-red-600 font-semibold"}>{totalPoints}</span>
+                  {totalPoints !== 100 && (
+                    <span className="ml-1 text-red-600"> (Phải bằng 100)</span>
+                  )}
                 </div>
               </div>
             </div>

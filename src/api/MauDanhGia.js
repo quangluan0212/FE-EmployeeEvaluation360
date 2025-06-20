@@ -1,5 +1,28 @@
 import apiClient from "./api";
 
+// Lấy thông tin mẫu đánh giá theo ID
+export const getMauDanhGiaById = async (maMau) => {
+  try {
+    const token = localStorage.getItem("authToken");
+    if (!token) throw new Error("Token không tồn tại");
+    const response = await apiClient.get(
+      `/MauDanhGia/admin-get-thong-tin-mau-danh-gia`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          maMau: maMau,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error getting MauDanhGia by ID:", error);
+    throw error;
+  }
+};
+
 export const addMauDanhGia = async (data) => {
   try {
     const token = localStorage.getItem("authToken");
@@ -20,22 +43,25 @@ export const addMauDanhGia = async (data) => {
   }
 };
 
-export const updateMauDanhGia = async (data) => {
+export const updateMauDanhGia = async (maMau, data) => {
   try {
     const token = localStorage.getItem("authToken");
     if (!token) throw new Error("Token không tồn tại");
-    const response = await apiClient.post(
-      "/MauDanhGia/tao-mau-danh-gia",
-      data,
+    const response = await apiClient.put(
+      `/MauDanhGia/admin-cap-nhat-mau-danh-gia`,data,
       {
         headers: {
           Authorization: `Bearer ${token}`,
+        },
+        params: {
+          maMau: maMau,
+
         },
       }
     );
     return response.data;
   } catch (error) {
-    console.error("Error adding MauDanhGia:", error);
+    console.error("Error updating MauDanhGia:", error);
     throw error;
   }
 };
