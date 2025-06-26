@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import { login } from "../api/NguoiDung";
+import { getThongBaoDanhGia } from "../api/DanhGia";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getToken, decodeToken, getUserRolesFromToken } from "../api/auth";
 import { User, Lock, LogIn, AlertCircle, Eye, EyeOff } from "lucide-react";
@@ -12,7 +14,6 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  
 
   useEffect(() => {
     if (location.pathname === "/login") {
@@ -60,6 +61,30 @@ const LoginPage = () => {
       const roles = token ? getUserRolesFromToken(token) : [];
       localStorage.setItem("roles", JSON.stringify(roles));
       setMessage("Đăng nhập thành công!");
+      try {
+        const thongBao = await getThongBaoDanhGia(userId);
+        if (thongBao > 0) {
+          toast.info(
+            `Bạn còn ${thongBao} đánh giá chưa hoàn thành.
+            Vui lòng hoàn thành trước khi hết hạn!!!`,
+            {
+              position: "top-right",
+              autoClose: 20000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              className:
+                "bg-red-100 text-red-800 border-l-4 border-red-500 shadow-lg",
+              bodyClassName: "text-sm font-semibold",
+              progressClassName: "bg-red-500",
+            }
+          );
+        }
+      } catch (error) {
+        console.warn("Không thể lấy thông báo đánh giá:", error);
+      }
       if (roles.includes("Admin")) {
         navigate("/admin-dashboard");
       } else {

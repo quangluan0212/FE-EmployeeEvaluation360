@@ -143,7 +143,7 @@ const EnhancedSidebar = ({ userName, roles }) => {
                 collapsed={collapsed}
               />
               <SidebarItem
-                to="/evaluations"
+                to="/evaluation-results"
                 icon={<ClipboardCheck size={20} />}
                 text="Kết quả đánh giá"
                 collapsed={collapsed}
@@ -167,9 +167,15 @@ const EnhancedSidebar = ({ userName, roles }) => {
                 collapsed={collapsed}
               />
               <SidebarItem
-                to="/evaluations"
+                to="/evaluation-results"
                 icon={<ClipboardCheck size={20} />}
                 text="Kết quả đánh giá"
+                collapsed={collapsed}
+              />
+               <SidebarItem
+                to="/group-members-page"
+                icon={<Group size={20} />}
+                text="Nhóm"
                 collapsed={collapsed}
               />
             </>

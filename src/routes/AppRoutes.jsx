@@ -1,5 +1,6 @@
 import React from "react";
 import PrivateRoute from "../routes/PrivateRoute";
+import PrivateRouteNotAdmin from "../routes/PrivateRouteNotAdmin";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "../pages/LoginPage";
 import HomePage from "../pages/HomePage";
@@ -30,7 +31,7 @@ const AppRoutes = () => {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="" element={<DashboardLayout />}>
           <Route path="/profile" element={<Profile />} />
-          <Route path="/evaluations" element={<Evaluations />} />
+          <Route path="/evaluation-results" element={<Evaluations />} />
           <Route
             path="/admin-dashboard"
             element={
@@ -42,9 +43,9 @@ const AppRoutes = () => {
           <Route
             path="/group-members-page"
             element={
-              <PrivateRoute role="Leader">
+              <PrivateRouteNotAdmin>
                 <GroupMembersPage />
-              </PrivateRoute>
+              </PrivateRouteNotAdmin>
             }
           />
           <Route
@@ -89,7 +90,6 @@ const AppRoutes = () => {
             }
           />
           <Route
-
             path="/admin-evaluations"
             element={
               <PrivateRoute role="Admin">
@@ -113,11 +113,22 @@ const AppRoutes = () => {
               </PrivateRoute>
             }
           />
-          <Route path="/user-evaluations" element={<UserEvaluation />} />
+          <Route
+            path="/user-evaluations"
+            element={
+              <PrivateRouteNotAdmin>
+                <UserEvaluation />
+              </PrivateRouteNotAdmin>
+            }
+          />
 
           <Route
             path="/group-management/:maNhom/members"
-            element={<GroupMembers />}
+            element={
+              <PrivateRoute role="Admin">
+                <GroupMembers />
+              </PrivateRoute>
+            }
           />
         </Route>
         <Route path="*" element={<NotFound />} />

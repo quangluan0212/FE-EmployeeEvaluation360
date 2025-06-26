@@ -318,7 +318,7 @@ const EvaluationTemplateManagement = () => {
   };
 
   return (
-    <div className="w-full h-full mx-auto p-6 bg-gradient-to-br from-white to-gray-50 shadow-xl rounded-xl">
+    <div className="w-full h-max mx-auto p-6 bg-gradient-to-br from-white to-gray-50 shadow-xl rounded-xl">
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div className="flex items-center">
           <FileText className="h-7 w-7 text-indigo-600 mr-3" />

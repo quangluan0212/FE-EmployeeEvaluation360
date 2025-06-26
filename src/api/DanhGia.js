@@ -8,6 +8,19 @@ const getAuthHeaders = () => {
   };
 };
 
+export const getThongBaoDanhGia = async (maNguoiDung) => {
+  try {
+    const response = await apiClient.get("/DanhGia/thong-bao-danh-gia", {
+      headers: getAuthHeaders(),
+      params: { maNguoiDung },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching Thong Bao Danh Gia:", error);
+    throw error;
+  }
+}
+
 export const getAllNguoiChuaDanhGiaPaged = async (
   page = 1,
   pageSize = 10,

@@ -66,16 +66,18 @@ export const updateMauDanhGia = async (maMau, data) => {
   }
 };
 
-export const deleteMauDanhGia = async (data) => {
+export const deleteMauDanhGia = async (maMau) => {
   try {
     const token = localStorage.getItem("authToken");
     if (!token) throw new Error("Token không tồn tại");
-    const response = await apiClient.post(
-      "/MauDanhGia/tao-mau-danh-gia",
-      data,
+    const response = await apiClient.delete(
+      "/MauDanhGia/admin-xoa-mau-danh-gia",
       {
         headers: {
           Authorization: `Bearer ${token}`,
+        },
+        params: {
+          maMau: maMau,
         },
       }
     );
