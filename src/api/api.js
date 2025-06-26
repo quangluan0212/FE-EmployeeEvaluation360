@@ -6,7 +6,7 @@ const apiClient = axios.create({
   // baseURL: 'http://192.168.1.9:5000/api', //npm run dev -- --host
   // baseURL: "http://localhost:5294/api", // npm run dev
   baseURL:
-    "http://vietan360backend-embufeb4fja7axf6.southeastasia-01.azurewebsites.net/api", // npm
+    "https://vietan360backend-embufeb4fja7axf6.southeastasia-01.azurewebsites.net/api", // npm
 
   headers: {
     "Content-Type": "application/json",
