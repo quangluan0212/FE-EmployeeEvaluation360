@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
-import {
-  GetAllDanhGia,
-  GetAllDanhGiaCheo,
-  GetAllTuDanhGia,
-  GetDanhGiaById,
-} from "../api/DanhGia";
+import { GetAllDanhGiaByLeader, GetDanhGiaById } from "../api/DanhGia";
+import { getListNhomByLeader } from "../api/Nhom";
 import {
   Search,
   Eye,
@@ -16,12 +12,11 @@ import {
   BarChart3,
   FileText,
   Star,
-  TrendingUp,
   Calendar,
   User,
 } from "lucide-react";
 
-const AdminDetailsEvaluation = () => {
+const LeaderDetailsEvaluation = () => {
   const [data, setData] = useState({
     items: [],
     currentPage: 1,
@@ -30,26 +25,36 @@ const AdminDetailsEvaluation = () => {
   });
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filterType, setFilterType] = useState("all");
+  const [selectedGroup, setSelectedGroup] = useState(null); // Lọc theo mã nhóm
+  const [groups, setGroups] = useState([]); // Danh sách nhóm của Leader
   const [page, setPage] = useState(1);
   const [selectedDanhGia, setSelectedDanhGia] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const pageSize = 10;
+  const maNguoiDung = localStorage.getItem("userId"); // Lấy mã người dùng từ localStorage
 
+  // Hàm lấy danh sách nhóm mà Leader quản lý
+  const fetchGroups = async () => {
+    try {
+      const groupData = await getListNhomByLeader(maNguoiDung);
+      setGroups(groupData || []);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách nhóm:", error);
+      setGroups([]);
+    }
+  };
+
+  // Hàm lấy dữ liệu đánh giá
   const fetchData = async () => {
     setLoading(true);
     try {
-      let response;
-      switch (filterType) {
-        case "cross":
-          response = await GetAllDanhGiaCheo(page, pageSize, search);
-          break;
-        case "self":
-          response = await GetAllTuDanhGia(page, pageSize, search);
-          break;
-        default:
-          response = await GetAllDanhGia(page, pageSize, search);
-      }
+      const response = await GetAllDanhGiaByLeader(
+        maNguoiDung,
+        page,
+        pageSize,
+        search,
+        selectedGroup
+      );
       setData({
         items: response.items || [],
         currentPage: response.currentPage || 1,
@@ -57,19 +62,21 @@ const AdminDetailsEvaluation = () => {
         totalCount: response.totalCount || 0,
       });
     } catch (error) {
-      console.error("Error fetching evaluations:", error);
+      console.error("Lỗi khi lấy danh sách đánh giá:", error);
       setData({ items: [], currentPage: 1, totalPages: 1, totalCount: 0 });
     } finally {
       setLoading(false);
     }
   };
 
+  // Gọi API khi component mount và khi thay đổi page hoặc selectedGroup
   useEffect(() => {
+    fetchGroups();
     fetchData();
-  }, [page, filterType]);
+  }, [page, selectedGroup]);
 
   const handleSearch = () => {
-    setPage(1); // Reset to page 1 on search
+    setPage(1); // Reset về trang 1 khi tìm kiếm
     fetchData();
   };
 
@@ -89,7 +96,7 @@ const AdminDetailsEvaluation = () => {
         alert("Không thể tải chi tiết đánh giá!");
       }
     } catch (error) {
-      console.error("Error fetching evaluation details:", error);
+      console.error("Lỗi khi lấy chi tiết đánh giá:", error);
       alert("Đã có lỗi xảy ra khi tải chi tiết đánh giá!");
     }
   };
@@ -99,26 +106,12 @@ const AdminDetailsEvaluation = () => {
     setSelectedDanhGia(null);
   };
 
-  const getFilterIcon = (type) => {
-    switch (type) {
-      case "cross":
-        return <Users className="w-4 h-4" />;
-      case "self":
-        return <User className="w-4 h-4" />;
-      default:
-        return <BarChart3 className="w-4 h-4" />;
-    }
+  const getFilterIcon = () => {
+    return <Users className="w-4 h-4" />;
   };
 
-  const getFilterColor = (type) => {
-    switch (type) {
-      case "cross":
-        return "from-blue-500 to-indigo-500";
-      case "self":
-        return "from-green-500 to-emerald-500";
-      default:
-        return "from-purple-500 to-pink-500";
-    }
+  const getFilterColor = () => {
+    return "from-blue-500 to-indigo-500";
   };
 
   if (loading) {
@@ -140,7 +133,7 @@ const AdminDetailsEvaluation = () => {
   return (
     <div className="w-full h-full py-2 px-2">
       <div className="w-full h-full mx-auto">
-        {/* Enhanced Header */}
+        {/* Header */}
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-4">
             <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -151,13 +144,13 @@ const AdminDetailsEvaluation = () => {
                 Chi Tiết Đánh Giá
               </h1>
               <p className="text-gray-600">
-                Theo dõi và quản lý tất cả các đánh giá trong hệ thống
+                Theo dõi và quản lý đánh giá trong các nhóm bạn quản lý
               </p>
             </div>
           </div>
         </div>
 
-        {/* Enhanced Filters and Search */}
+        {/* Filters and Search */}
         <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
           <div className="flex items-center space-x-2 mb-4">
             <Filter className="h-5 w-5 text-indigo-600" />
@@ -169,23 +162,28 @@ const AdminDetailsEvaluation = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
-                Loại đánh giá
+                Nhóm
               </label>
               <div className="relative">
                 <select
-                  value={filterType}
+                  value={selectedGroup || ""}
                   onChange={(e) => {
-                    setFilterType(e.target.value);
+                    setSelectedGroup(
+                      e.target.value === "" ? null : Number(e.target.value)
+                    );
                     setPage(1);
                   }}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all bg-gray-50 focus:bg-white appearance-none"
                 >
-                  <option value="all">Tất cả đánh giá</option>
-                  <option value="cross">Đánh giá chéo</option>
-                  <option value="self">Tự đánh giá</option>
+                  <option value="">Tất cả nhóm</option>
+                  {groups.map((group) => (
+                    <option key={group.maNhom} value={group.maNhom}>
+                      {group.tenNhom}
+                    </option>
+                  ))}
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                  {getFilterIcon(filterType)}
+                  {getFilterIcon()}
                 </div>
               </div>
             </div>
@@ -213,7 +211,7 @@ const AdminDetailsEvaluation = () => {
           </div>
         </div>
 
-        {/* Enhanced Table */}
+        {/* Table */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
           <div className="px-6 py-4 bg-gradient-to-r from-indigo-500 to-purple-600">
             <h3 className="text-lg font-semibold text-white flex items-center">
@@ -284,18 +282,18 @@ const AdminDetailsEvaluation = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap max-w-[250px]">
                       {item.maNguoiDanhGia === item.maNguoiDuocDanhGia ? (
                         <span className="text-sm text-gray-500 italic">
                           Chính mình
                         </span>
                       ) : (
                         <div className="flex items-center">
-                          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold text-sm mr-3">
+                          <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold text-xs mr-2">
                             {item.nguoiDuocDanhGia?.charAt(0)?.toUpperCase() ||
                               "?"}
                           </div>
-                          <div className="text-sm font-semibold text-gray-900">
+                          <div className="text-sm font-semibold text-gray-900 truncate max-w-[150px]">
                             {item.nguoiDuocDanhGia}
                           </div>
                         </div>
@@ -337,7 +335,7 @@ const AdminDetailsEvaluation = () => {
           </div>
         </div>
 
-        {/* Enhanced Pagination */}
+        {/* Pagination */}
         <div className="mt-8 bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
           <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
             <div className="flex items-center space-x-2 text-sm text-gray-600">
@@ -396,10 +394,10 @@ const AdminDetailsEvaluation = () => {
           </div>
         </div>
 
-        {/* Enhanced Modal for Evaluation Details */}
+        {/* Modal for Evaluation Details */}
         {showModal && selectedDanhGia && (
           <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden transform transition-all duration-300 scale-100">
+            <div className="  bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden swoop-in">
               <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
@@ -500,4 +498,4 @@ const AdminDetailsEvaluation = () => {
   );
 };
 
-export default AdminDetailsEvaluation;
+export default LeaderDetailsEvaluation;

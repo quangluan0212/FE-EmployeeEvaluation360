@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import {
   BarChart3,
   ClipboardCheck,
+  BookCheck,
   ChartCandlestick,
   Users,
   Briefcase,
@@ -81,7 +82,7 @@ const EnhancedSidebar = ({ userName, roles }) => {
                 text="Dashboard"
                 collapsed={collapsed}
               />
-              <SidebarItem 
+              <SidebarItem
                 to="/evaluation-period-management"
                 icon={<CalendarRange size={20} />}
                 text="Đợt đánh giá"
@@ -144,7 +145,7 @@ const EnhancedSidebar = ({ userName, roles }) => {
               />
               <SidebarItem
                 to="/evaluation-results"
-                icon={<ClipboardCheck size={20} />}
+                icon={<BookCheck size={20} />}
                 text="Kết quả đánh giá"
                 collapsed={collapsed}
               />
@@ -152,6 +153,12 @@ const EnhancedSidebar = ({ userName, roles }) => {
                 to="/group-members-page"
                 icon={<Group size={20} />}
                 text="Nhóm"
+                collapsed={collapsed}
+              />
+              <SidebarItem
+                to="/leader-details-evaluation"
+                icon={<BarChart3 size={20} />}
+                text="Chi tiết đánh giá"
                 collapsed={collapsed}
               />
             </>
@@ -168,11 +175,11 @@ const EnhancedSidebar = ({ userName, roles }) => {
               />
               <SidebarItem
                 to="/evaluation-results"
-                icon={<ClipboardCheck size={20} />}
+                icon={<BookCheck size={20} />}
                 text="Kết quả đánh giá"
                 collapsed={collapsed}
               />
-               <SidebarItem
+              <SidebarItem
                 to="/group-members-page"
                 icon={<Group size={20} />}
                 text="Nhóm"

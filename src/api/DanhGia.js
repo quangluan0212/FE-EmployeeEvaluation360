@@ -8,6 +8,31 @@ const getAuthHeaders = () => {
   };
 };
 
+export const GetAllDanhGiaByLeader = async (maNguoiDung, page = 1, pageSize = 10, search = "", maNhom) => {
+  try {
+    const token = localStorage.getItem("authToken");
+    if (!token) throw console.error("Không có token !!!");
+    const response = await apiClient.get(`DanhGia/leader-get-all-danh-sach-danh-gia-paged`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        maNguoiDung,
+        page,
+        pageSize,
+        search,
+        maNhom,
+      },
+    });
+    if (response.code == 200) {
+      return response.data;
+    }
+  } catch (error) {
+    console.log("Có lỗi xảy ra khi lấy danh sách đánh giá by leader :,", error);
+    throw error;
+  }
+};
+
 export const getThongBaoDanhGia = async (maNguoiDung) => {
   try {
     const response = await apiClient.get("/DanhGia/thong-bao-danh-gia", {

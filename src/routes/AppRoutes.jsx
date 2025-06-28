@@ -21,6 +21,7 @@ import GroupMembersPage from "../pages/GroupMembersPage";
 import AdminDashboard from "../pages/AdminDashboard";
 import NotFound from "../pages/NotFound";
 import AdminDetailsEvaluation from "../pages/AdminDetailsEvaluation";
+import LeaderDetailsEvaluation from "../pages/LeaderDetailsEvaluation";
 
 const AppRoutes = () => {
   return (
@@ -86,6 +87,14 @@ const AppRoutes = () => {
             element={
               <PrivateRoute role="Admin">
                 <AdminDetailsEvaluation />
+              </PrivateRoute>
+            }
+          />
+           <Route
+            path="/leader-details-evaluation"
+            element={
+              <PrivateRoute role="Leader">
+                <LeaderDetailsEvaluation />
               </PrivateRoute>
             }
           />

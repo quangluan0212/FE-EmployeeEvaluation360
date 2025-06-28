@@ -8,6 +8,20 @@ const getAuthHeaders = () => {
   };
 };
 
+// danh sach nhom by ma leader
+export const getListNhomByLeader = async (maNguoiDung) => {
+  try {
+    const response = await apiClient.get("/Nhom/danh-sach-nhom-theo-leader", {
+      headers: getAuthHeaders(),
+      params: { maNguoiDung },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Lỗi lấy danh sách nhóm:", error);
+    throw error;
+  }
+};
+
 // Thêm thành viên vào nhóm
 export const addThanhVienVaoNhom = async (nhomData) => {
   try {
