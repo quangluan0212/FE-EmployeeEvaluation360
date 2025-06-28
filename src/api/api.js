@@ -4,9 +4,8 @@ import { getToken } from "./auth";
 // Create an Axios instance
 const apiClient = axios.create({
   // baseURL: 'http://192.168.1.9:5000/api', //npm run dev -- --host
-  baseURL: "http://localhost:5294/api", // npm run dev
-  // baseURL:
-    // "https://vietan360backend-embufeb4fja7axf6.southeastasia-01.azurewebsites.net/api", // npm
+  // baseURL: "http://localhost:5294/api", // npm run dev
+  baseURL: "https://vietan360backend-embufeb4fja7axf6.southeastasia-01.azurewebsites.net/api",
 
   headers: {
     "Content-Type": "application/json",
