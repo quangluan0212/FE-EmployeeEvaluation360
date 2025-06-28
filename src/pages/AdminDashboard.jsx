@@ -211,6 +211,7 @@ const EvaluationPieChart = ({ goodCount, poorCount, restCount }) => {
           justifyContent: "center",
         }}
       >
+        esist
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           <div
             style={{
@@ -290,17 +291,39 @@ const AdminDashboard = () => {
     setModalSearchQuery,
   } = useModal(selectedMaDotDanhGia)
 
-  // Tạo danh sách năm
+  // Initialize year list and set default year to current year
   useEffect(() => {
-    const currentYear = new Date().getFullYear()
-    const yearList = Array.from({ length: currentYear - 2019 }, (_, i) => ({
-      value: currentYear - i,
-      label: `${currentYear - i}`,
-    }))
-    setYears(yearList)
+    const initializeYearAndDotDanhGia = async () => {
+      const currentYear = new Date().getFullYear()
+      const yearList = Array.from({ length: currentYear - 2019 }, (_, i) => ({
+        value: currentYear - i,
+        label: `${currentYear - i}`,
+      }))
+      setYears(yearList)
+      setSelectedYear(currentYear.toString())
+
+      // Fetch evaluation periods for the current year
+      let options = await fetchDotDanhGia(currentYear, setError)
+      if (options.length > 0) {
+        // Select the first evaluation period (most recent since sorted descending)
+        setDotDanhGiaOptions(options)
+        setSelectedMaDotDanhGia(options[0].value)
+      } else {
+        // If no evaluation periods, try the previous year
+        const previousYear = (currentYear - 1).toString()
+        setSelectedYear(previousYear)
+        options = await fetchDotDanhGia(previousYear, setError)
+        setDotDanhGiaOptions(options)
+        if (options.length > 0) {
+          setSelectedMaDotDanhGia(options[0].value)
+        }
+      }
+    }
+
+    initializeYearAndDotDanhGia()
   }, [])
 
-  // Fetch dữ liệu ban đầu
+  // Fetch initial data based on selected year and evaluation period
   useEffect(() => {
     if (!maNguoiDung) {
       setError("Vui lòng đăng nhập để xem dashboard.")
@@ -329,7 +352,9 @@ const AdminDashboard = () => {
         setError(err.message || "Lỗi khi tải dữ liệu ban đầu.")
       }
     }
-    fetchInitialData()
+    if (selectedMaDotDanhGia) {
+      fetchInitialData()
+    }
   }, [maNguoiDung, navigate, currentPage, selectedMaDotDanhGia])
 
   const handleYearChange = async (year) => {
@@ -339,6 +364,9 @@ const AdminDashboard = () => {
     if (year) {
       const options = await fetchDotDanhGia(year, setError)
       setDotDanhGiaOptions(options)
+      if (options.length > 0) {
+        setSelectedMaDotDanhGia(options[0].value)
+      }
     }
     const allData = await fetchAllEvaluations(1, searchQuery, null, setLoading, setError)
     setAllEvaluations(allData.items || [])
