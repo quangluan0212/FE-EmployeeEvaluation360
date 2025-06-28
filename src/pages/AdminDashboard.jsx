@@ -211,7 +211,6 @@ const EvaluationPieChart = ({ goodCount, poorCount, restCount }) => {
           justifyContent: "center",
         }}
       >
-        esist
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           <div
             style={{
@@ -291,7 +290,7 @@ const AdminDashboard = () => {
     setModalSearchQuery,
   } = useModal(selectedMaDotDanhGia)
 
-  // Initialize year list and set default year to current year
+  // Khởi tạo danh sách năm và chọn năm hiện tại làm mặc định
   useEffect(() => {
     const initializeYearAndDotDanhGia = async () => {
       const currentYear = new Date().getFullYear()
@@ -302,14 +301,14 @@ const AdminDashboard = () => {
       setYears(yearList)
       setSelectedYear(currentYear.toString())
 
-      // Fetch evaluation periods for the current year
+      // Lấy danh sách đợt đánh giá cho năm hiện tại
       let options = await fetchDotDanhGia(currentYear, setError)
       if (options.length > 0) {
-        // Select the first evaluation period (most recent since sorted descending)
+        // Chọn đợt đánh giá đầu tiên (mới nhất vì API trả về theo thứ tự giảm dần)
         setDotDanhGiaOptions(options)
         setSelectedMaDotDanhGia(options[0].value)
       } else {
-        // If no evaluation periods, try the previous year
+        // Nếu không có đợt đánh giá, thử năm trước
         const previousYear = (currentYear - 1).toString()
         setSelectedYear(previousYear)
         options = await fetchDotDanhGia(previousYear, setError)
@@ -323,7 +322,7 @@ const AdminDashboard = () => {
     initializeYearAndDotDanhGia()
   }, [])
 
-  // Fetch initial data based on selected year and evaluation period
+  // Lấy dữ liệu ban đầu dựa trên năm và đợt đánh giá đã chọn
   useEffect(() => {
     if (!maNguoiDung) {
       setError("Vui lòng đăng nhập để xem dashboard.")
@@ -332,31 +331,36 @@ const AdminDashboard = () => {
     }
     const fetchInitialData = async () => {
       try {
-        const allData = await fetchAllEvaluations(currentPage, searchQuery, selectedMaDotDanhGia, setLoading, setError)
+        // Đặt trạng thái loading trước khi gọi API
+        setLoading((prev) => ({ ...prev, all: true, latest: true, best: true, worst: true, nguoiChuaDanhGia: true }))
+
+        // Gọi API để lấy toàn bộ đánh giá với trang hiện tại
+        const allData = await fetchAllEvaluations(currentPage, searchQuery, selectedMaDotDanhGia || null, setLoading, setError)
         setAllEvaluations(allData.items || [])
         setFilteredEvaluations(allData.items || [])
         setTotalPages(allData.totalPages || 1)
 
-        const latestData = await fetchLatestEvaluations(1, "", false, selectedMaDotDanhGia, setLoading, setError)
+        // Gọi các API khác để lấy số liệu thống kê
+        const latestData = await fetchLatestEvaluations(1, "", false, selectedMaDotDanhGia || null, setLoading, setError)
         setTotalLatestEvaluations(latestData.totalCount || 0)
 
-        const bestData = await fetchBestEvaluation(1, "", false, selectedMaDotDanhGia, setLoading, setError)
+        const bestData = await fetchBestEvaluation(1, "", false, selectedMaDotDanhGia || null, setLoading, setError)
         setTotalBestEvaluations(bestData.totalCount || 0)
 
-        const worstData = await fetchWorstEvaluation(1, "", false, selectedMaDotDanhGia, setLoading, setError)
+        const worstData = await fetchWorstEvaluation(1, "", false, selectedMaDotDanhGia || null, setLoading, setError)
         setTotalWorstEvaluations(worstData.totalCount || 0)
 
-        const nguoiChuaDanhGiaData = await fetchAllNguoiChuaDanhGia(selectedMaDotDanhGia, setLoading, setError)
+        const nguoiChuaDanhGiaData = await fetchAllNguoiChuaDanhGia(selectedMaDotDanhGia || null, setLoading, setError)
         setTotalNguoiChuaDanhGia(nguoiChuaDanhGiaData.length || 0)
       } catch (err) {
         setError(err.message || "Lỗi khi tải dữ liệu ban đầu.")
       }
     }
-    if (selectedMaDotDanhGia) {
-      fetchInitialData()
-    }
-  }, [maNguoiDung, navigate, currentPage, selectedMaDotDanhGia])
+    // Gọi API ngay cả khi selectedMaDotDanhGia rỗng để đảm bảo dữ liệu được tải
+    fetchInitialData()
+  }, [maNguoiDung, navigate, currentPage, selectedMaDotDanhGia, searchQuery])
 
+  // Xử lý thay đổi năm
   const handleYearChange = async (year) => {
     setSelectedYear(year)
     setSelectedMaDotDanhGia("")
@@ -368,6 +372,8 @@ const AdminDashboard = () => {
         setSelectedMaDotDanhGia(options[0].value)
       }
     }
+    // Reset trang về 1 khi thay đổi năm
+    setCurrentPage(1)
     const allData = await fetchAllEvaluations(1, searchQuery, null, setLoading, setError)
     setAllEvaluations(allData.items || [])
     setFilteredEvaluations(allData.items || [])
@@ -379,8 +385,10 @@ const AdminDashboard = () => {
     setTotalNguoiChuaDanhGia(nguoiChuaDanhGiaData.length || 0)
   }
 
+  // Xử lý thay đổi đợt đánh giá
   const handleDotDanhGiaChange = async (maDotDanhGia) => {
     setSelectedMaDotDanhGia(maDotDanhGia)
+    setCurrentPage(1)
     const allData = await fetchAllEvaluations(1, searchQuery, maDotDanhGia || null, setLoading, setError)
     setAllEvaluations(allData.items || [])
     setFilteredEvaluations(allData.items || [])
@@ -392,6 +400,7 @@ const AdminDashboard = () => {
     setTotalNguoiChuaDanhGia(nguoiChuaDanhGiaData.length || 0)
   }
 
+  // Xử lý tìm kiếm
   const handleSearch = async () => {
     setCurrentPage(1)
     const allData = await fetchAllEvaluations(1, searchQuery, selectedMaDotDanhGia || null, setLoading, setError)
@@ -399,6 +408,7 @@ const AdminDashboard = () => {
     setTotalPages(allData.totalPages || 1)
   }
 
+  // Làm mới dữ liệu
   const refreshData = async () => {
     setLoading({
       all: true,
@@ -407,21 +417,21 @@ const AdminDashboard = () => {
       worst: true,
       nguoiChuaDanhGia: true,
     })
-    const allData = await fetchAllEvaluations(currentPage, searchQuery, selectedMaDotDanhGia, setLoading, setError)
+    const allData = await fetchAllEvaluations(currentPage, searchQuery, selectedMaDotDanhGia || null, setLoading, setError)
     setAllEvaluations(allData.items || [])
     setFilteredEvaluations(allData.items || [])
     setTotalPages(allData.totalPages || 1)
 
-    const latestData = await fetchLatestEvaluations(1, "", false, selectedMaDotDanhGia, setLoading, setError)
+    const latestData = await fetchLatestEvaluations(1, "", false, selectedMaDotDanhGia || null, setLoading, setError)
     setTotalLatestEvaluations(latestData.totalCount || 0)
 
-    const bestData = await fetchBestEvaluation(1, "", false, selectedMaDotDanhGia, setLoading, setError)
+    const bestData = await fetchBestEvaluation(1, "", false, selectedMaDotDanhGia || null, setLoading, setError)
     setTotalBestEvaluations(bestData.totalCount || 0)
 
-    const worstData = await fetchWorstEvaluation(1, "", false, selectedMaDotDanhGia, setLoading, setError)
+    const worstData = await fetchWorstEvaluation(1, "", false, selectedMaDotDanhGia || null, setLoading, setError)
     setTotalWorstEvaluations(worstData.totalCount || 0)
 
-    const nguoiChuaDanhGiaData = await fetchAllNguoiChuaDanhGia(selectedMaDotDanhGia, setLoading, setError)
+    const nguoiChuaDanhGiaData = await fetchAllNguoiChuaDanhGia(selectedMaDotDanhGia || null, setLoading, setError)
     setTotalNguoiChuaDanhGia(nguoiChuaDanhGiaData.length || 0)
   }
 
@@ -466,7 +476,7 @@ const AdminDashboard = () => {
     )
   }
 
-  // Calculate chart data
+  // Tính toán dữ liệu cho biểu đồ
   const restEvaluations = totalLatestEvaluations - totalBestEvaluations - totalWorstEvaluations
 
   return (
