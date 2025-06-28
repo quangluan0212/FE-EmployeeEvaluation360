@@ -127,8 +127,8 @@ const GroupManagement = () => {
     }
   }
 
-  const handleViewMembers = (maNhom) => {
-    navigate(`/group-management/${maNhom}/members`)
+  const handleViewMembers = (maNhom, tenNhom) => {
+    navigate(`/group-management/${maNhom}`, { state: { tenNhom } })
   }
 
   const validateForm = () => {
@@ -185,12 +185,12 @@ const GroupManagement = () => {
   return (
     <div className="w-full mx-auto p-6 bg-gradient-to-br from-white to-gray-50 shadow-xl rounded-xl py-2 px-2">
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-        <div className="flex items-center">
+        <div className="flex items-center p-4">
           <Users className="h-7 w-7 text-blue-600 mr-3" />
           <h1 className="text-2xl font-bold text-gray-800">Quản lý Nhóm</h1>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto p-4">
           <div className="relative w-full md:w-auto">
             <input
               type="text"
@@ -274,7 +274,7 @@ const GroupManagement = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
                           <button
-                            onClick={() => handleViewMembers(g.maNhom)}
+                            onClick={() => handleViewMembers(g.maNhom, g.tenNhom)}
                             className="p-1.5 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
                             title="Xem thành viên"
                           >

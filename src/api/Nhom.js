@@ -147,11 +147,16 @@ export const getThanhVienTheoNhom = async (maNhom, page, pageSize) => {
 //xóa thành viên nhóm
 export const deleteThanhVien = async (maNhom, maNguoiDung) => {
   try {
-    const response = await apiClient.delete("/Nhom/xoa-thanh-vien-nhom", {
+    const response = await apiClient.delete("/Nhom/xoa-thanh-vien-khoi-nhom", {
       headers: getAuthHeaders(),
-      params: { maNhom, maNguoiDung },
+      params : {
+        maNhom: maNhom,
+        maNguoiDung: maNguoiDung,
+      }
     });
-    return response.data;
+    if (response.code === 200) {
+      return response.data;
+    }
   } catch (error) {
     console.error("Lỗi khi xóa thành viên nhóm:", error);
     throw error;

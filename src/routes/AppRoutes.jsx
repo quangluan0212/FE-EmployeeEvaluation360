@@ -132,7 +132,7 @@ const AppRoutes = () => {
           />
 
           <Route
-            path="/group-management/:maNhom/members"
+            path="/group-management/:maNhom"
             element={
               <PrivateRoute role="Admin">
                 <GroupMembers />

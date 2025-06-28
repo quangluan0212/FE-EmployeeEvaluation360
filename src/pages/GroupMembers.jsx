@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom"; // Add useNavigate
 import {
   getDanhSachThanhVienNhom,
   deleteThanhVien,
@@ -7,20 +7,22 @@ import {
   addThanhVienVaoNhom,
 } from "../api/Nhom";
 import { showSuccess, showError, showConfirm } from "../utils/notifications";
+import { ArrowLeft } from "lucide-react"; // Import an icon for the Back button
 
 const GroupMembers = () => {
   const { maNhom } = useParams();
+  const { state } = useLocation();
+  const navigate = useNavigate(); // Initialize useNavigate
+  const tenNhom = state?.tenNhom || "Nhóm không xác định"; // Fallback for tenNhom
   const [members, setMembers] = useState([]);
   const [membersPage, setMembersPage] = useState(1);
   const [membersPageSize, setMembersPageSize] = useState(10);
   const [totalMembersPages, setTotalMembersPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [showModal, setShowModal] = useState(false); // Modal xóa
-  const [memberToDelete, setMemberToDelete] = useState(null);
-  const [showAddModal, setShowAddModal] = useState(false); // Modal thêm thành viên
-  const [availableUsers, setAvailableUsers] = useState([]); // Danh sách người dùng không trong nhóm
-  const [selectedUsers, setSelectedUsers] = useState([]); // Danh sách maNguoiDung được chọn
-  const [loading, setLoading] = useState(false); // Trạng thái tải dữ liệu
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [availableUsers, setAvailableUsers] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   // Lấy danh sách thành viên nhóm
   useEffect(() => {
@@ -122,7 +124,7 @@ const GroupMembers = () => {
   };
 
   // Xử lý xóa thành viên
-  const handleDeleteMember = async (id, hoTen) => {
+  const handleDeleteMember = async (maNguoiDung, hoTen) => {
     const result = await showConfirm(
       "Xác nhận xóa",
       `Bạn có chắc chắn muốn xóa ${hoTen} khỏi nhóm? Hành động này không thể hoàn tác.`,
@@ -135,8 +137,10 @@ const GroupMembers = () => {
 
     try {
       setLoading(true);
-      await deleteThanhVien(id);
-      setMembers((prev) => prev.filter((member) => member.id !== id));
+      await deleteThanhVien(maNhom, maNguoiDung);
+      setMembers((prev) =>
+        prev.filter((member) => member.maNguoiDung !== maNguoiDung)
+      );
       showSuccess("Thành công", "Xóa thành viên thành công!");
     } catch (error) {
       console.error("Lỗi khi xóa thành viên:", error);
@@ -146,12 +150,26 @@ const GroupMembers = () => {
     }
   };
 
+  // Handle Back navigation
+  const handleBack = () => {
+    navigate("/group-management"); // Navigate back to GroupManagement
+  };
+
   return (
     <div className="container mx-auto p-6 bg-white shadow-lg rounded-xl min-h-screen">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-semibold text-gray-800">
-          Danh sách thành viên
-        </h2>
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={handleBack}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+          >
+            <ArrowLeft className="h-5 w-5 inline-block mr-2" />
+            Quay lại
+          </button>
+          <h2 className="text-3xl font-semibold text-gray-800">
+            Danh sách thành viên - {tenNhom}
+          </h2>
+        </div>
         <div className="flex items-center space-x-4">
           <input
             type="text"
@@ -208,7 +226,9 @@ const GroupMembers = () => {
                   <td className="py-4 px-6 text-gray-600">{member.chucVu}</td>
                   <td className="py-4 px-6 text-center">
                     <button
-                      onClick={() => handleDeleteMember(member.id, member.hoTen)}
+                      onClick={() =>
+                        handleDeleteMember(member.maNguoiDung, member.hoTen)
+                      }
                       className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
                       disabled={loading}
                     >

@@ -244,10 +244,6 @@ const GroupMembersPage = () => {
           </button>
         </div>
       </div>
-
-      <p className="mt-8 text-center text-xs text-gray-500">
-        © Website Việt An 360, by Lê Quang Luân
-      </p>
     </div>
   );
 };
