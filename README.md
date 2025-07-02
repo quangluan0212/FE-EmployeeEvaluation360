@@ -19,7 +19,7 @@ This project is an Employee Evaluation 360° web application built with React an
 ### Installation
 
 ```bash
-git clone https://github.com/your-username/FE-EmployeeEvaluation360.git
+git clone https://github.com/quangluan0212/FE-EmployeeEvaluation360.git
 cd FE-EmployeeEvaluation360
 npm install
 # or
