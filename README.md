@@ -1,12 +1,81 @@
-# React + Vite
+## Project Overview
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is an Employee Evaluation 360° web application built with React and Vite. It provides a platform for comprehensive employee performance reviews, allowing feedback from multiple sources within an organization.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 360-degree employee evaluation workflow
+- Modern React development with Vite for fast builds and hot module replacement
+- ESLint integration for code quality
+- Easy to extend and customize
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Prerequisites
+
+- Node.js (version 16 or higher recommended)
+- npm or yarn
+
+### Installation
+
+```bash
+git clone https://github.com/your-username/FE-EmployeeEvaluation360.git
+cd FE-EmployeeEvaluation360
+npm install
+# or
+yarn install
+```
+
+### Running the Development Server
+
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+The app will be available at [http://localhost:5173](http://localhost:5173) by default.
+
+### Building for Production
+
+```bash
+npm run build
+# or
+yarn build
+```
+
+### Linting
+
+```bash
+npm run lint
+# or
+yarn lint
+```
+
+## Folder Structure
+
+```
+FE-EmployeeEvaluation360/
+├── public/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   ├── hooks/
+│   └── ...
+├── package.json
+└── README.md
+```
+
+## Technologies Used
+
+- [React](https://react.dev/)
+- [Vite](https://vitejs.dev/)
+- [ESLint](https://eslint.org/)
+
+## Contributing
+
+Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.
+
+## License
+
+This project is licensed under the MIT License.
